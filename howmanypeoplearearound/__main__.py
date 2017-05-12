@@ -41,7 +41,7 @@ def showTimer(timeleft):
                          ('=' * int(50.5 * i / total), 101 * i / total, timeleft_string))
         sys.stdout.flush()
         time.sleep(0.1)
-    print("\n")
+    print("")
 
 
 @click.command()
@@ -49,7 +49,7 @@ def showTimer(timeleft):
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
 @click.option('-o', '--out', default='', help='output JSON of cellphone data to file')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
-@click.option('-n', '--number', help='just print the number', is_flag=True)
+@click.option('--number', help='just print the number', is_flag=True)
 @click.option('-j', '--jsonprint', help='just print the json', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby', is_flag=True)
 def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
@@ -129,7 +129,7 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
                 foundMacs[mac] = rssi
 
     if len(foundMacs) == 0:
-        print("\nFound no signals, are you sure %s supports monitor mode?" % adapter)
+        print("Found no signals, are you sure %s supports monitor mode?" % adapter)
         return 
 
     cellphone = [
