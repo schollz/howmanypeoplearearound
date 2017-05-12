@@ -44,6 +44,7 @@ def showTimer(timeleft):
                          ('=' * int(50.5 * i / total), 101 * i / total, timeleft_string))
         sys.stdout.flush()
         time.sleep(0.1)
+    print("\n")
 
 
 @click.command()
@@ -75,39 +76,16 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint):
     if number:
         verbose = False
 
-    # Check which adapters support monitor mode
-    command = "iw list" 
-    if verbose:
-        print(command)
-    run_iw = subprocess.Popen(
-        command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    stdout, nothing = run_iw.communicate()
-    hasMonitorMode = []
-    for item in stdout.decode('utf-8').split('Wiphy'):
-        if len(item.strip())==0:
-            continue
-        hasMonitorMode.append('* monitor' in item)
-    if verbose:
-        print(hasMonitorMode)
-
     adapters = []
     for line in subprocess.check_output(
             ['ifconfig']).decode('utf-8').split('\n'):
         if ' Link' in line and line[0] == 'w':
             adapters.append(line.split()[0])
-    adapters_to_show = []
-    for i,a in enumerate(adapters):
-        if hasMonitorMode[i]:
-            adapters_to_show.append(a)
 
-    if len(adapters_to_show) == 0:
-        if not jsonprint:
-            print("Sorry, no adapters found.")
-        sys.exit(-1)
 
     if len(adapter) == 0:
         title = 'Please choose the adapter you want to use: '
-        adapter, index = pick(adapters_to_show, title)
+        adapter, index = pick(adapters, title)
     if not number:
         print("Using %s adapter and scanning for %s seconds..." %
               (adapter, scantime))
@@ -146,9 +124,15 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint):
             rssi = 0
             dats = line.split()
             if len(dats) == 3:
+                if ':' not in dats[0]:
+                    continue
                 rssi = float(dats[2].split(',')[0]) / 2 + \
                     float(dats[2].split(',')[0]) / 2
-            foundMacs[mac] = rssi
+                foundMacs[mac] = rssi
+
+    if len(foundMacs) == 0:
+        print("\nFound no signals, are you sure %s supports monitor mode?" % adapter)
+        return 
 
     cellphone = [
         'Motorola Mobility LLC, a Lenovo Company',
