@@ -17,67 +17,25 @@ Getting started
 
 ## Dependencies
 
-Make sure you have Python3.3+.
-
-### [ffmpeg](https://ffmpeg.org/download.html)
-
-#### Mac
-```
-brew install ffmpeg
-```
+### [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) and [iw](https://wireless.wiki.kernel.org/en/users/documentation/iw)
 
 #### Ubuntu
 ```
-sudo apt-get install ffmpeg
+sudo apt-get install tshark iw
 ```
-
-#### Windows
-[Download](https://ffmpeg.org/download.html)
 
 ## Install
 
-If you have python3.3+ installed, run this command
+If you have Python installed, run this command
 
 ```
-pip install playlistfromsong
+pip install howmanypeoplearearound
 ```
-
-Or use `pip3` instead of `pip` to install it with python3.
 
 ## Run
 
 ```bash
-playlistfromsong --song 'Miles Davis Blue In Green'
+howmanypeoplearearound
 ```
 
-![](http://i.imgur.com/ldVHZcc.gif)
-
-You can also use Spotify if you provide a Bearer token (which [you can get here](https://developer.spotify.com/web-api/console/get-track/)):
-
-![](http://i.imgur.com/uzEEEFh.gif)
-
-You can also set the spotify bearer token
-
-```
-playlistfromsong config --open
-```
-
-That command will open the config file with default application.
-
-Edit the config file and add following entry
-
-    spotify_bearer_token: <your spotify bearer token>
-
-change `<your spotify bearer token>` with actual token and save.
-
-After editing the config file, everytime you use the program that token will be loaded.
-
-You can also download a single song with
-
-```bash
-playlistfromsong --song 'Miles Davis Blue In Green' -n 1
-```
-
-# howmanypeoplearearound
-Using tshark to quantify the number of people in a location
-A tshark wrapper to count the number of cellphones in the vicinity
+You ca
