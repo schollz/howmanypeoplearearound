@@ -10,6 +10,8 @@ import humanize
 import click
 from pick import pick
 
+from oui import *
+
 def which(program):
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
@@ -50,6 +52,7 @@ def find_people(adapter,scantime,verbose):
         return
 
     # TODO CHECK IF PERMISSIONS ARE AVAILABLE!
+    # (RUN TSHARK BRIEFLY AND THEN CHECK IF FILE WAS CREATED)
 
     adapters = []
     for line in subprocess.check_output(['ifconfig']).decode('utf-8').split('\n'):
@@ -73,7 +76,6 @@ def find_people(adapter,scantime,verbose):
     command = "%s -r /tmp/tshark-temp -T fields -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % tshark
     run_tshark = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, nothing = run_tshark.communicate()   
-    oui = json.load(open('data/oui.json','r'))
     foundMacs = []
     for line in output.decode('utf-8').split('\n'):
         if verbose:
