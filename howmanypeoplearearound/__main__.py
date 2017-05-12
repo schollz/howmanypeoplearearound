@@ -49,12 +49,13 @@ def showTimer(timeleft):
 
 @click.command()
 @click.option('-a', '--adapter', default='', help='adapter to use')
-@click.option('-v', '--verbose', help='verbose mode', is_flag=True)
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
+@click.option('-o', '--out', default='', help='output JSON of cellphone data to file')
+@click.option('-v', '--verbose', help='verbose mode', is_flag=True)
 @click.option('-n', '--number', help='just print the number', is_flag=True)
 @click.option('-j', '--jsonprint', help='just print the json', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby', is_flag=True)
-def main(adapter, scantime, verbose, number, nearby, jsonprint):
+def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
     """Uses tshark to determine approximately how many people are around"""
     if os.getuid() != 0:
         print("need to use sudo for tshark/iw")
@@ -177,6 +178,11 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint):
         else:
             print("\n\nThere are about %d people around.\n\n" % num_people)
 
+    if len(out) > 0:
+        with open(out,'w') as f:
+            f.write(json.dumps(cellphone_people,indent=2))
+        if verbose:
+            print("Wrote data to %s" % out)
     os.remove('/tmp/tshark-temp')
 
 
