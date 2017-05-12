@@ -39,3 +39,14 @@ howmanypeoplearearound
 ```
 
 You ca
+
+
+How does it work?
+==================
+
+...
+
+License
+=======
+
+MIT
