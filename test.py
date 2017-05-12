@@ -49,6 +49,8 @@ def find_people(adapter,scantime,verbose):
         print("tshark not found, you must install using\n\napt-get install tshark")
         return
 
+    # TODO CHECK IF PERMISSIONS ARE AVAILABLE!
+
     adapters = []
     for line in subprocess.check_output(['ifconfig']).decode('utf-8').split('\n'):
         if ' Link' in line and line[0] == 'w':
@@ -98,6 +100,9 @@ def find_people(adapter,scantime,verbose):
         print("\n\nNo one around but you.\n\n")
     else:
         print("\n\nThere are about %d people around.\n\n" % num_people)
+
+    #  TODO DELETE TSHARK FILE
+
 
 if __name__ == '__main__':
     find_people()
