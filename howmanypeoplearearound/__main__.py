@@ -36,10 +36,12 @@ def showTimer(timeleft):
         sys.stdout.write('\r')
         # the exact output you're looking for:
         timeleft_string = humanize.naturaltime(
-            datetime.datetime.now() - datetime.timedelta(seconds=(total - i + 1) / 10))
+            datetime.datetime.now() -
+            datetime.timedelta(
+                seconds=(total - i + 1) / 10))
         timeleft_string = ' '.join(timeleft_string.split()[:2])
-        sys.stdout.write("[%-50s] %d%% %s left" % ('=' *
-                                                   int(50.5 * i / total), 101 * i / total, timeleft_string))
+        sys.stdout.write("[%-50s] %d%% %s left" %
+                         ('=' * int(50.5 * i / total), 101 * i / total, timeleft_string))
         sys.stdout.flush()
         time.sleep(0.1)
 
@@ -48,9 +50,15 @@ def showTimer(timeleft):
 @click.option('-a', '--adapter', default='', help='adapter to use')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
-def main(adapter, scantime, verbose):
+@click.option('-n', '--number', help='just print the number', is_flag=True)
+@click.option('-j', '--jsonprint', help='just print the json', is_flag=True)
+@click.option('-n', '--nearby', help='only quantify signals that are nearby', is_flag=True)
+def main(adapter, scantime, verbose, number, nearby, jsonprint):
     """Uses tshark to determine approximately how many people are around"""
-    print(oui['30:7c:5e'])
+    if os.getuid() != 0:
+        print("need to use sudo for tshark/iw")
+        return
+
     try:
         iw = which("iw")
     except:
@@ -62,36 +70,72 @@ def main(adapter, scantime, verbose):
         print("tshark not found, install using\n\napt-get install tshark\n")
         return
 
-    # TODO CHECK IF PERMISSIONS ARE AVAILABLE!
-    # (RUN TSHARK BRIEFLY AND THEN CHECK IF FILE WAS CREATED)
+    if jsonprint:
+        number = True
+    if number:
+        verbose = False
+
+    # Check which adapters support monitor mode
+    command = "iw list" 
+    if verbose:
+        print(command)
+    run_iw = subprocess.Popen(
+        command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, nothing = run_iw.communicate()
+    hasMonitorMode = []
+    for item in stdout.decode('utf-8').split('Wiphy'):
+        if len(item.strip())==0:
+            continue
+        hasMonitorMode.append('* monitor' in item)
+    if verbose:
+        print(hasMonitorMode)
 
     adapters = []
-    for line in subprocess.check_output(['ifconfig']).decode('utf-8').split('\n'):
+    for line in subprocess.check_output(
+            ['ifconfig']).decode('utf-8').split('\n'):
         if ' Link' in line and line[0] == 'w':
             adapters.append(line.split()[0])
+    adapters_to_show = []
+    for i,a in enumerate(adapters):
+        if hasMonitorMode[i]:
+            adapters_to_show.append(a)
+
+    if len(adapters_to_show) == 0:
+        if not jsonprint:
+            print("Sorry, no adapters found.")
+        sys.exit(-1)
+
     if len(adapter) == 0:
         title = 'Please choose the adapter you want to use: '
-        adapter, index = pick(adapters, title)
-    print("Using %s adapter and scanning for %s seconds..." %
-          (adapter, scantime))
-    # Start timer
-    t1 = threading.Thread(target=showTimer, args=(scantime,))
-    t1.start()
+        adapter, index = pick(adapters_to_show, title)
+    if not number:
+        print("Using %s adapter and scanning for %s seconds..." %
+              (adapter, scantime))
+
+    if not number:
+        # Start timer
+        t1 = threading.Thread(target=showTimer, args=(scantime,))
+        t1.start()
 
     # Scan with tshark
     command = "%s -I -i %s -a duration:%s -w /tmp/tshark-temp" % (
         tshark, adapter, scantime)
+    if verbose:
+        print(command)
     run_tshark = subprocess.Popen(
         command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, nothing = run_tshark.communicate()
-    t1.join()
+    if not number:
+        t1.join()
 
     # Read tshark output
     command = "%s -r /tmp/tshark-temp -T fields -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % tshark
+    if verbose:
+        print(command)
     run_tshark = subprocess.Popen(
         command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, nothing = run_tshark.communicate()
-    foundMacs = []
+    foundMacs = {}
     for line in output.decode('utf-8').split('\n'):
         if verbose:
             print(line)
@@ -99,27 +143,57 @@ def main(adapter, scantime, verbose):
             continue
         mac = line.split()[0].strip()
         if mac not in foundMacs:
-            foundMacs.append(mac)
+            rssi = 0
+            dats = line.split()
+            if len(dats) == 3:
+                rssi = float(dats[2].split(',')[0]) / 2 + \
+                    float(dats[2].split(',')[0]) / 2
+            foundMacs[mac] = rssi
 
-    num_cellphones = 0
-    cellphone = ['Motorola Mobility LLC, a Lenovo Company', 'GUANGDONG OPPO MOBILE TELECOMMUNICATIONS CORP.,LTD', 'Huawei Symantec Technologies Co.,Ltd.', 'Microsoft',
-                 'HTC Corporation', 'Samsung Electronics Co.,Ltd', 'BlackBerry RTS', 'LG ELECTRONICS INC', 'Apple, Inc.', 'LG Electronics', 'LG Electronics (Mobile Communications)']
+    cellphone = [
+        'Motorola Mobility LLC, a Lenovo Company',
+        'GUANGDONG OPPO MOBILE TELECOMMUNICATIONS CORP.,LTD',
+        'Huawei Symantec Technologies Co.,Ltd.',
+        'Microsoft',
+        'HTC Corporation',
+        'Samsung Electronics Co.,Ltd',
+        'BlackBerry RTS',
+        'LG ELECTRONICS INC',
+        'Apple, Inc.',
+        'LG Electronics',
+        'LG Electronics (Mobile Communications)']
+
+    cellphone_people = []
     for mac in foundMacs:
         if mac[:8] in oui:
             oui_id = oui[mac[:8]]
             if verbose:
                 print(mac, oui_id, oui_id in cellphone)
             if oui_id in cellphone:
-                num_cellphones += 1
+                if not nearby or (nearby and foundMacs[mac] > -70):
+                    cellphone_people.append(
+                        {'company': oui_id, 'rssi': foundMacs[mac], 'mac': mac})
+
+    if verbose:
+        print(json.dumps(cellphone_people, indent=2))
 
     percentage_of_people_with_phones = 0.84
-    num_people = int(round(num_cellphones / percentage_of_people_with_phones))
-    if num_people == 0:
-        print("\n\nNo one around but you.\n\n")
-    else:
-        print("\n\nThere are about %d people around.\n\n" % num_people)
+    num_people = int(
+        round(
+            len(cellphone_people) /
+            percentage_of_people_with_phones))
 
-    #  TODO DELETE TSHARK FILE
+    if number and not jsonprint:
+        print(num_people)
+    elif jsonprint:
+        print(json.dumps(cellphone_people, indent=2))
+    else:
+        if num_people == 0:
+            print("\n\nNo one around but you.\n\n")
+        else:
+            print("\n\nThere are about %d people around.\n\n" % num_people)
+
+    os.remove('/tmp/tshark-temp')
 
 
 if __name__ == '__main__':
