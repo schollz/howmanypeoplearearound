@@ -6,7 +6,6 @@ import json
 import time
 import datetime
 
-import humanize
 import click
 from pick import pick
 
@@ -35,12 +34,10 @@ def showTimer(timeleft):
     for i in range(total):
         sys.stdout.write('\r')
         # the exact output you're looking for:
-        timeleft_string = humanize.naturaltime(
-            datetime.datetime.now() -
-            datetime.timedelta(
-                seconds=(total - i + 1) / 10))
-        timeleft_string = ' '.join(timeleft_string.split()[:2])
-        sys.stdout.write("[%-50s] %d%% %s left" %
+        timeleft_string = '%ds left' % int((total-i+1)/10)
+        if (total-i+1) > 600:
+            timeleft_string = '%dmin %ds left' % (int((total-i+1) / 600), int((total-i+1)/10 % 60))
+        sys.stdout.write("[%-50s] %d%% %15s" %
                          ('=' * int(50.5 * i / total), 101 * i / total, timeleft_string))
         sys.stdout.flush()
         time.sleep(0.1)
@@ -174,9 +171,9 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
         print(json.dumps(cellphone_people, indent=2))
     else:
         if num_people == 0:
-            print("\n\nNo one around but you.\n\n")
+            print("No one around but you.")
         else:
-            print("\n\nThere are about %d people around.\n\n" % num_people)
+            print("There are about %d people around." % num_people)
 
     if len(out) > 0:
         with open(out,'w') as f:

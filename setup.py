@@ -12,7 +12,6 @@ setup(
     keywords=['tshark', 'wifi', 'location'],
     classifiers=[],
     install_requires=[
-        "humanize",
         "click",
         'pick',
     ],
