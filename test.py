@@ -1,9 +1,12 @@
+import threading
 import sys
 import os
 import subprocess
 import json 
+import time
+import datetime
 
-from tqdm import tqdm
+import humanize
 import click
 from pick import pick
 
@@ -23,13 +26,23 @@ def which(program):
                 return exe_file
     raise
 
+def showTimer(timeleft):
+    total = int(timeleft)*10
+    for i in range(total):
+        sys.stdout.write('\r')
+        # the exact output you're looking for:
+        timeleft_string = humanize.naturaltime(datetime.datetime.now() - datetime.timedelta(seconds=(total-i+1)/10))
+        timeleft_string = ' '.join(timeleft_string.split()[:2])
+        sys.stdout.write("[%-50s] %d%% %s left" % ('='*int(50.5*i/total), 101*i/total,timeleft_string))
+        sys.stdout.flush()
+        time.sleep(0.1)
 
 @click.command()
 @click.option('-a','--adapter', default='', help='adapter to use')
 @click.option('-v','--verbose', help='verbose mode', is_flag=True)
-@click.option('-t','--time', default='60', help='time in seconds to scan')
-def find_people(adapter,time,verbose):
-    """Simple program that greets NAME for a total of COUNT times."""
+@click.option('-s','--scantime', default='60', help='time in seconds to scan')
+def find_people(adapter,scantime,verbose):
+    """Uses tshark to determine approximately how many people are around"""
     try:
         tshark = which("tshark")
     except:
@@ -43,11 +56,16 @@ def find_people(adapter,time,verbose):
     if len(adapter) == 0:
         title = 'Please choose the adapter you want to use: '
         adapter, index = pick(adapters, title)
-    print("Using %s adapter and scanning for %s seconds..." % (adapter,time))
+    print("Using %s adapter and scanning for %s seconds..." % (adapter,scantime))
+    # Start timer 
+    t1 = threading.Thread(target=showTimer,args=(scantime,))
+    t1.start()
+
     # Scan with tshark
-    command = "%s -I -i %s -a duration:%s -w /tmp/tshark-temp" % (tshark,adapter,time)
+    command = "%s -I -i %s -a duration:%s -w /tmp/tshark-temp" % (tshark,adapter,scantime)
     run_tshark = subprocess.Popen(command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, nothing = run_tshark.communicate()   
+    t1.join()
 
     # Read tshark output
     command = "%s -r /tmp/tshark-temp -T fields -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % tshark
