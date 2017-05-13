@@ -1,7 +1,7 @@
 
 # howmanypeoplearearound 
 
-Monitor wifi signals :satellite: to count the number of people around you :family_man_man_boy:.
+Count the number of people around you :family_man_man_boy: by monitoring wifi signals :satellite:.
 
 *howmanypeoplearearound* calculates the number of people in the vicinity
 using the approximate number of cellphones as a proxy (since 85-95% of people have cellphones nowadays). 
