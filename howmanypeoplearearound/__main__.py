@@ -58,7 +58,7 @@ def showTimer(timeleft):
 @click.option('-j', '--jsonprint', help='print JSON of cellphone data', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
-def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
+def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection):
     """Monitor wifi signals to count the number of people around you"""
 
     # Sanitize input
