@@ -51,13 +51,13 @@ def showTimer(timeleft):
 @click.command()
 @click.option('-a', '--adapter', prompt='Specify WiFi adapter (use ifconfig to determine)', help='adapter to use')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
-@click.option('-o', '--out', default='', help='output JSON of cellphone data to file')
+@click.option('-o', '--out', default='', help='output cellphone data to file')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
 @click.option('--number', help='just print the number', is_flag=True)
-@click.option('-j', '--jsonprint', help='just print the json', is_flag=True)
-@click.option('-n', '--nearby', help='only quantify signals that are nearby', is_flag=True)
+@click.option('-j', '--jsonprint', help='print JSON of cellphone data', is_flag=True)
+@click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
 def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
-    """Monitor wifi signals 📡 to count the number of people around you 👨‍👨‍👦"""
+    """Monitor wifi signals to count the number of people around you"""
     try:
         tshark = which("tshark")
     except:
