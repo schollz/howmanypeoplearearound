@@ -49,7 +49,7 @@ def showTimer(timeleft):
 
 
 @click.command()
-@click.option('-a', '--adapter', default='', help='adapter to use')
+@click.option('-a', '--adapter', prompt='Specify WiFi adapter (use ifconfig to determine)', help='adapter to use')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
 @click.option('-o', '--out', default='', help='output JSON of cellphone data to file')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
@@ -69,18 +69,19 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
     if number:
         verbose = False
 
-    adapters = []
-    for line in subprocess.check_output(
-            ['ifconfig']).decode('utf-8').split('\n'):
-        if ' Link' in line and line[0] == 'w':
-            adapters.append(line.split()[0])
+    # This part requires SUDO, maybe not use it
+    # adapters = []
+    # for line in subprocess.check_output(
+    #         ['ifconfig']).decode('utf-8').split('\n'):
+    #     if ' Link' in line and line[0] == 'w':
+    #         adapters.append(line.split()[0])
 
-    if len(adapter) == 0:
-        title = 'Please choose the adapter you want to use: '
-        adapter, index = pick(adapters, title)
-    if not number:
-        print("Using %s adapter and scanning for %s seconds..." %
-              (adapter, scantime))
+    # if len(adapter) == 0:
+    #     title = 'Please choose the adapter you want to use: '
+    #     adapter, index = pick(adapters, title)
+    # if not number:
+    #     print("Using %s adapter and scanning for %s seconds..." %
+    #           (adapter, scantime))
 
     if not number:
         # Start timer
