@@ -4,7 +4,7 @@
 Count the number of people around you :family_man_man_boy: by monitoring wifi signals :satellite:.
 
 *howmanypeoplearearound* calculates the number of people in the vicinity
-using the approximate number of cellphones as a proxy (since 85-95% of people have cellphones nowadays). 
+using the approximate number of smartphones as a proxy (since [~70% of people have smartphones nowadays](https://twitter.com/conradhackett/status/701798230619590656)). 
 A cellphone is determined to be in proximity to the computer based on sniffing WiFi probe 
 requests. Possible uses of *howmanypeoplearearound* include: monitoring foot traffic in an area
 with Raspberry Pis, seeing if your roommates are home, calculate how many people are on the bus, etc.
