@@ -166,7 +166,9 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
         print(json.dumps(cellphone_people, indent=2))
     else:
         if num_people == 0:
-            print("No one around but you.")
+            print("No one around (not even you!).")
+        elif num_people == 1:
+            print("No one around, but you.")
         else:
             print("There are about %d people around." % num_people)
 
