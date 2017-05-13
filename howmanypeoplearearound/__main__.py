@@ -160,7 +160,7 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
     if verbose:
         print(json.dumps(cellphone_people, indent=2))
 
-    percentage_of_people_with_phones = 0.84
+    percentage_of_people_with_phones = 0.7 # US / Canada: https://twitter.com/conradhackett/status/701798230619590656
     num_people = int(
         round(
             len(cellphone_people) /
