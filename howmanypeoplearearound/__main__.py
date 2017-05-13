@@ -57,13 +57,14 @@ def showTimer(timeleft):
 @click.option('--number', help='just print the number', is_flag=True)
 @click.option('-j', '--jsonprint', help='print JSON of cellphone data', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
+@click.option('--nocorrection', help='do not apply correction', is_flag=True)
 def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
     """Monitor wifi signals to count the number of people around you"""
-    
+
     # Sanitize input
     adapter = shlex.quote(adapter)
     scantime = shlex.quote(scantime)
-    
+
     try:
         tshark = which("tshark")
     except:
@@ -160,11 +161,12 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
     if verbose:
         print(json.dumps(cellphone_people, indent=2))
 
-    percentage_of_people_with_phones = 0.7 # US / Canada: https://twitter.com/conradhackett/status/701798230619590656
-    num_people = int(
-        round(
-            len(cellphone_people) /
-            percentage_of_people_with_phones))
+    # US / Canada: https://twitter.com/conradhackett/status/701798230619590656
+    percentage_of_people_with_phones = 0.7
+    if nocorrection:
+        percentage_of_people_with_phones = 1
+    num_people = int(round(len(cellphone_people) /
+                           percentage_of_people_with_phones))
 
     if number and not jsonprint:
         print(num_people)
