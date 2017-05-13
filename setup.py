@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='howmanypeoplearearound',
     packages=['howmanypeoplearearound'],
-    version='0.0.2',
+    version='0.1.0',
     description='A tshark wrapper to count the number of cellphones in the vicinity',
     author='schollz',
     url='https://github.com/schollz/howmanypeoplearearound',
@@ -13,7 +13,6 @@ setup(
     classifiers=[],
     install_requires=[
         "click",
-        'pick',
     ],
     setup_requires=[],
     tests_require=[],

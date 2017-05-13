@@ -7,7 +7,7 @@ import time
 import datetime
 
 import click
-from pick import pick
+# from pick import pick
 
 from howmanypeoplearearound.oui import *
 

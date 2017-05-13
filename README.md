@@ -49,7 +49,7 @@ pip install howmanypeoplearearound
 
 ## Run
 
-To run, just type in
+First determine which adapter you want to use to scan (usually its `wlan1`), which you can find the name of using `ifconfig`. Then, to run, just type in
 
 ```bash
 $ howmanypeoplearearound
