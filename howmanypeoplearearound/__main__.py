@@ -5,6 +5,7 @@ import subprocess
 import json
 import time
 import datetime
+import shlex
 
 import click
 # from pick import pick
@@ -58,6 +59,11 @@ def showTimer(timeleft):
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
 def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
     """Monitor wifi signals to count the number of people around you"""
+    
+    # Sanitize input
+    adapter = shlex.quote(adapter)
+    scantime = shlex.quote(scantime)
+    
     try:
         tshark = which("tshark")
     except:
