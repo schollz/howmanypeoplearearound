@@ -13,6 +13,8 @@ from howmanypeoplearearound.oui import *
 
 
 def which(program):
+    """Determines whether program exists
+    """
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
@@ -30,13 +32,15 @@ def which(program):
 
 
 def showTimer(timeleft):
+    """Shows a countdown timer"""
     total = int(timeleft) * 10
     for i in range(total):
         sys.stdout.write('\r')
         # the exact output you're looking for:
-        timeleft_string = '%ds left' % int((total-i+1)/10)
-        if (total-i+1) > 600:
-            timeleft_string = '%dmin %ds left' % (int((total-i+1) / 600), int((total-i+1)/10 % 60))
+        timeleft_string = '%ds left' % int((total - i + 1) / 10)
+        if (total - i + 1) > 600:
+            timeleft_string = '%dmin %ds left' % (
+                int((total - i + 1) / 600), int((total - i + 1) / 10 % 60))
         sys.stdout.write("[%-50s] %d%% %15s" %
                          ('=' * int(50.5 * i / total), 101 * i / total, timeleft_string))
         sys.stdout.flush()
@@ -53,16 +57,7 @@ def showTimer(timeleft):
 @click.option('-j', '--jsonprint', help='just print the json', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby', is_flag=True)
 def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
-    """Uses tshark to determine approximately how many people are around"""
-    if os.getuid() != 0:
-        print("need to use sudo for tshark/iw")
-        return
-
-    try:
-        iw = which("iw")
-    except:
-        print("iw not found, install using\n\napt-get install iw\n")
-        return
+    """Monitor wifi signals 📡 to count the number of people around you 👨‍👨‍👦"""
     try:
         tshark = which("tshark")
     except:
@@ -79,7 +74,6 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
             ['ifconfig']).decode('utf-8').split('\n'):
         if ' Link' in line and line[0] == 'w':
             adapters.append(line.split()[0])
-
 
     if len(adapter) == 0:
         title = 'Please choose the adapter you want to use: '
@@ -130,7 +124,7 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
 
     if len(foundMacs) == 0:
         print("Found no signals, are you sure %s supports monitor mode?" % adapter)
-        return 
+        return
 
     cellphone = [
         'Motorola Mobility LLC, a Lenovo Company',
@@ -176,8 +170,8 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out):
             print("There are about %d people around." % num_people)
 
     if len(out) > 0:
-        with open(out,'w') as f:
-            f.write(json.dumps(cellphone_people,indent=2))
+        with open(out, 'w') as f:
+            f.write(json.dumps(cellphone_people, indent=2))
         if verbose:
             print("Wrote data to %s" % out)
     os.remove('/tmp/tshark-temp')

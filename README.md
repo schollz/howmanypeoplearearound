@@ -1,7 +1,7 @@
 
-# howmanypeoplearearound :family_man_man_boy:
+# howmanypeoplearearound 
 
-<p align="center">Monitor wifi signals :satellite: to quantify the number of people in a location</a></p>
+Monitor wifi signals :satellite: to count the number of people around you :family_man_man_boy:
 
 *howmanypeoplearearound* calculates the number of people in the vicinity
 using the approximate number of cellphones a proxy (since 85-95% of people have cellphones nowadays). 
@@ -26,8 +26,18 @@ Raspberry Pi.
 ### [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) 
 
 ```
-sudo apt-get install tshark 
+sudo apt-get install tshark
 ```
+
+Then update it so it can be run as non-root:
+
+```
+sudo dpkg-reconfigure wireshark-common     (select YES)
+sudo usermod -a -G wireshark $USER
+```
+
+You will need to logout and log back in for changes to effect.
+
 
 ## Install
 
