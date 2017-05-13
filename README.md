@@ -103,6 +103,12 @@ $ cat test.json
 
 A higher rssi means closer (one of these phones is mine, and the other two are my roommates' who were upstairs).
 
+You can create a log file with the number of people this one-liner (make sure to change your adapter):
+
+```
+$  while :; do echo "`date` `howmanypeoplearearound --number -a wlan1 -s 180`" >> log; sleep 1; done
+```
+
 How does it work?
 ==================
 
