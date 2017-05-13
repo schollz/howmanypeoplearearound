@@ -9,7 +9,7 @@ A cellphone is determined to be in proximity to the computer based on sniffing W
 requests. Possible uses of *howmanypeoplearearound* include: monitoring foot traffic in an area
 with Raspberry Pis, seeing if your roommates are home, calculate how many people are on the bus, etc.
 
-Currently tested on Linux only (Raspbian and Ubuntu), but please send a PR if for OS X if you are so kind!
+Tested on Linux (Raspbian and Ubuntu) and macOS.
 
 Getting started
 ===============
