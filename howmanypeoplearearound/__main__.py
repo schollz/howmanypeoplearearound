@@ -5,7 +5,6 @@ import subprocess
 import json
 import time
 import datetime
-import shlex
 
 import click
 # from pick import pick
@@ -62,8 +61,8 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
     """Monitor wifi signals to count the number of people around you"""
 
     # Sanitize input
-    adapter = shlex.quote(adapter)
-    scantime = shlex.quote(scantime)
+    #adapter = shlex.quote(adapter)
+    #scantime = shlex.quote(scantime)
 
     try:
         tshark = which("tshark")
@@ -96,22 +95,22 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
         t1.start()
 
     # Scan with tshark
-    command = "%s -I -i %s -a duration:%s -w /tmp/tshark-temp" % (
-        tshark, adapter, scantime)
+    command = [tshark, '-I', '-i', adapter, '-a','duration:'+scantime,'-w','/tmp/tshark-temp']
     if verbose:
         print(command)
     run_tshark = subprocess.Popen(
-        command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        command,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, nothing = run_tshark.communicate()
     if not number:
         t1.join()
 
     # Read tshark output
-    command = "%s -r /tmp/tshark-temp -T fields -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % tshark
+    #command = "%s -r /tmp/tshark-temp -T fields -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % tshark
+    command = [tshark,'-r','/tmp/tshark-temp','-T','fields','-e','wlan.sa','-e','wlan.bssid','-e','radiotap.dbm_antsignal']
     if verbose:
         print(command)
     run_tshark = subprocess.Popen(
-        command.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        command,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, nothing = run_tshark.communicate()
     foundMacs = {}
     for line in output.decode('utf-8').split('\n'):
