@@ -6,10 +6,12 @@ Count the number of people around you :family_man_man_boy: by monitoring wifi si
 *howmanypeoplearearound* calculates the number of people in the vicinity
 using the approximate number of smartphones as a proxy (since [~70% of people have smartphones nowadays](https://twitter.com/conradhackett/status/701798230619590656)). 
 A cellphone is determined to be in proximity to the computer based on sniffing WiFi probe 
-requests. Possible uses of *howmanypeoplearearound* include: monitoring foot traffic in an area
-with Raspberry Pis, seeing if your roommates are home, calculate how many people are on the bus, etc.
+requests. Possible uses of *howmanypeoplearearound* include: monitoring foot traffic in your house
+with Raspberry Pis, seeing if your roommates are home, etc.
 
 Tested on Linux (Raspbian and Ubuntu) and macOS.
+
+### **It may be illegal** to use this to monitor networks, especially ones that *you do not own*. Please check your country's laws (for US [Section 18 U.S. Code § 2511](https://www.law.cornell.edu/uscode/text/18/2511)) - [discussion](https://github.com/schollz/howmanypeoplearearound/issues/4).
 
 Getting started
 ===============
