@@ -119,15 +119,19 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
         if len(line.strip()) == 0:
             continue
         mac = line.split()[0].strip()
-        if mac not in foundMacs:
+        dats = line.split()
+        if len(dats) == 3:
+            if ':' not in dats[0] or len(dats) != 3:
+                continue
+            if mac not in foundMacs:
+                foundMacs[mac] = []
             rssi = 0
-            dats = line.split()
-            if len(dats) == 3:
-                if ':' not in dats[0]:
-                    continue
-                rssi = float(dats[2].split(',')[0]) / 2 + \
-                    float(dats[2].split(',')[0]) / 2
-                foundMacs[mac] = rssi
+            rssi = float(dats[2].split(',')[0]) / 2 + \
+                float(dats[2].split(',')[0]) / 2
+            foundMacs[mac].append(rssi)
+
+    for mac in foundMacs:
+        foundMacs[mac] = float(sum(foundMacs[mac]))/float(len(foundMacs[mac]))
 
     if len(foundMacs) == 0:
         print("Found no signals, are you sure %s supports monitor mode?" % adapter)
