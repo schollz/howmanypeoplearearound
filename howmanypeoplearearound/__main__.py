@@ -180,8 +180,9 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
             print("There are about %d people around." % num_people)
 
     if len(out) > 0:
-        with open(out, 'w') as f:
-            f.write(json.dumps(cellphone_people, indent=2))
+        with open(out, 'a') as f:
+            data_dump = {'cellphones':cellphone_people,'time':time.time()}
+            f.write(json.dumps(data_dump)+"\n")
         if verbose:
             print("Wrote data to %s" % out)
     os.remove('/tmp/tshark-temp')
