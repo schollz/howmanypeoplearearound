@@ -57,7 +57,18 @@ def showTimer(timeleft):
 @click.option('-j', '--jsonprint', help='print JSON of cellphone data', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
-def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection):
+@click.option('--loop', help='loop forever', is_flag=True)
+def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop):
+    if loop:
+        while True:
+            scan(adapter, scantime, verbose, number,
+                 nearby, jsonprint, out, nocorrection, loop)
+    else:
+        scan(adapter, scantime, verbose, number,
+             nearby, jsonprint, out, nocorrection, loop)
+
+
+def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop):
     """Monitor wifi signals to count the number of people around you"""
 
     # Sanitize input
@@ -95,22 +106,24 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
         t1.start()
 
     # Scan with tshark
-    command = [tshark, '-I', '-i', adapter, '-a','duration:'+scantime,'-w','/tmp/tshark-temp']
+    command = [tshark, '-I', '-i', adapter, '-a',
+               'duration:' + scantime, '-w', '/tmp/tshark-temp']
     if verbose:
         print(command)
     run_tshark = subprocess.Popen(
-        command,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, nothing = run_tshark.communicate()
     if not number:
         t1.join()
 
     # Read tshark output
     #command = "%s -r /tmp/tshark-temp -T fields -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % tshark
-    command = [tshark,'-r','/tmp/tshark-temp','-T','fields','-e','wlan.sa','-e','wlan.bssid','-e','radiotap.dbm_antsignal']
+    command = [tshark, '-r', '/tmp/tshark-temp', '-T', 'fields', '-e',
+               'wlan.sa', '-e', 'wlan.bssid', '-e', 'radiotap.dbm_antsignal']
     if verbose:
         print(command)
     run_tshark = subprocess.Popen(
-        command,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, nothing = run_tshark.communicate()
     foundMacs = {}
     for line in output.decode('utf-8').split('\n'):
@@ -131,7 +144,8 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
             foundMacs[mac].append(rssi)
 
     for mac in foundMacs:
-        foundMacs[mac] = float(sum(foundMacs[mac]))/float(len(foundMacs[mac]))
+        foundMacs[mac] = float(sum(foundMacs[mac])) / \
+            float(len(foundMacs[mac]))
 
     if len(foundMacs) == 0:
         print("Found no signals, are you sure %s supports monitor mode?" % adapter)
@@ -185,8 +199,8 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
 
     if len(out) > 0:
         with open(out, 'a') as f:
-            data_dump = {'cellphones':cellphone_people,'time':time.time()}
-            f.write(json.dumps(data_dump)+"\n")
+            data_dump = {'cellphones': cellphone_people, 'time': time.time()}
+            f.write(json.dumps(data_dump) + "\n")
         if verbose:
             print("Wrote data to %s" % out)
     os.remove('/tmp/tshark-temp')
