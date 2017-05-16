@@ -1,16 +1,18 @@
 import threading
 import sys
 import os
+import platform
 import subprocess
 import json
 import time
 import datetime
-
+import socket
+import fcntl
+import struct
+import netifaces
 import click
-# from pick import pick
 
 from howmanypeoplearearound.oui import *
-
 
 def which(program):
     """Determines whether program exists
@@ -45,11 +47,11 @@ def showTimer(timeleft):
                          ('=' * int(50.5 * i / total), 101 * i / total, timeleft_string))
         sys.stdout.flush()
         time.sleep(0.1)
-    print("")
+    print ""
 
-
+click.echo('Network adapters: [%s]' % ', '.join(map(str, netifaces.interfaces())))
 @click.command()
-@click.option('-a', '--adapter', prompt='Specify WiFi adapter (use ifconfig to determine)', help='adapter to use')
+@click.option('-a', '--adapter', prompt='Specify WiFi adapter', help='adapter to use')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
 @click.option('-o', '--out', default='', help='output cellphone data to file')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
@@ -61,13 +63,20 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
     """Monitor wifi signals to count the number of people around you"""
 
     # Sanitize input
-    #adapter = shlex.quote(adapter)
-    #scantime = shlex.quote(scantime)
+    # adapter = shlex.quote(adapter)
+    # scantime = shlex.quote(scantime)
+
+    print("OS: " + os.name)
+    print("Platform: " + platform.system())
 
     try:
         tshark = which("tshark")
     except:
-        print("tshark not found, install using\n\napt-get install tshark\n")
+        if platform.system() != 'Darwin':
+            print('tshark not found, install using\n\napt-get install tshark\n')
+        else:
+            print('wireshark not found, install using: \n\tbrew install wireshark')
+            print('you may also need to execute: \n\tbrew cask install wireshark-chmodbpf')
         return
 
     if jsonprint:
@@ -76,46 +85,47 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
         verbose = False
 
     # This part requires SUDO, maybe not use it
-    # adapters = []
-    # for line in subprocess.check_output(
-    #         ['ifconfig']).decode('utf-8').split('\n'):
-    #     if ' Link' in line and line[0] == 'w':
-    #         adapters.append(line.split()[0])
+    adapters = []
+    for line in subprocess.check_output(
+            ['ifconfig']).decode('utf-8').split('\n'):
+        if ' Link' in line and line[0] == 'w':
+            adapters.append(line.split()[0])
 
-    # if len(adapter) == 0:
-    #     title = 'Please choose the adapter you want to use: '
-    #     adapter, index = pick(adapters, title)
-    # if not number:
-    #     print("Using %s adapter and scanning for %s seconds..." %
-    #           (adapter, scantime))
+    print "Using %s adapter and scanning for %s seconds..." % (adapter, scantime)
 
     if not number:
         # Start timer
         t1 = threading.Thread(target=showTimer, args=(scantime,))
+        t1.daemon = True
         t1.start()
 
     # Scan with tshark
-    command = [tshark, '-I', '-i', adapter, '-a','duration:'+scantime,'-w','/tmp/tshark-temp']
+    command = [tshark, '-I', '-i', adapter, '-a', 'duration:'+scantime, '-w', '/tmp/tshark-temp']
     if verbose:
-        print(command)
-    run_tshark = subprocess.Popen(
-        command,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print command
+    run_tshark = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, nothing = run_tshark.communicate()
     if not number:
         t1.join()
 
     # Read tshark output
     #command = "%s -r /tmp/tshark-temp -T fields -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % tshark
-    command = [tshark,'-r','/tmp/tshark-temp','-T','fields','-e','wlan.sa','-e','wlan.bssid','-e','radiotap.dbm_antsignal']
+    command = [
+        tshark, '-r',
+        '/tmp/tshark-temp', '-T',
+        'fields', '-e',
+        'wlan.sa', '-e',
+        'wlan.bssid', '-e',
+        'radiotap.dbm_antsignal'
+    ]
     if verbose:
-        print(command)
-    run_tshark = subprocess.Popen(
-        command,stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print command
+    run_tshark = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, nothing = run_tshark.communicate()
     foundMacs = {}
     for line in output.decode('utf-8').split('\n'):
         if verbose:
-            print(line)
+            print line
         if len(line.strip()) == 0:
             continue
         mac = line.split()[0].strip()
@@ -130,7 +140,7 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
                 foundMacs[mac] = rssi
 
     if len(foundMacs) == 0:
-        print("Found no signals, are you sure %s supports monitor mode?" % adapter)
+        print "Found no signals, are you sure %s supports monitor mode?" % adapter
         return
 
     cellphone = [
@@ -168,22 +178,22 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
                            percentage_of_people_with_phones))
 
     if number and not jsonprint:
-        print(num_people)
+        print num_people
     elif jsonprint:
-        print(json.dumps(cellphone_people, indent=2))
+        print json.dumps(cellphone_people, indent=2)
     else:
         if num_people == 0:
-            print("No one around (not even you!).")
+            print "No one around (not even you!)."
         elif num_people == 1:
-            print("No one around, but you.")
+            print "No one around, but you."
         else:
-            print("There are about %d people around." % num_people)
+            print "There are about %d people around." % num_people
 
     if len(out) > 0:
         with open(out, 'w') as f:
             f.write(json.dumps(cellphone_people, indent=2))
         if verbose:
-            print("Wrote data to %s" % out)
+            print "Wrote data to %s" % out
     os.remove('/tmp/tshark-temp')
 
 
