@@ -47,7 +47,7 @@ def showTimer(timeleft):
                          ('=' * int(50.5 * i / total), 101 * i / total, timeleft_string))
         sys.stdout.flush()
         time.sleep(0.1)
-    print ""
+    print("")
 
 click.echo('Network adapters: [%s]' % ', '.join(map(str, netifaces.interfaces())))
 @click.command()
@@ -91,7 +91,7 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
         if ' Link' in line and line[0] == 'w':
             adapters.append(line.split()[0])
 
-    print "Using %s adapter and scanning for %s seconds..." % (adapter, scantime)
+    print("Using %s adapter and scanning for %s seconds..." % (adapter, scantime))
 
     if not number:
         # Start timer
@@ -102,7 +102,7 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
     # Scan with tshark
     command = [tshark, '-I', '-i', adapter, '-a', 'duration:'+scantime, '-w', '/tmp/tshark-temp']
     if verbose:
-        print command
+        print(command)
     run_tshark = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, nothing = run_tshark.communicate()
     if not number:
@@ -119,13 +119,13 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
         'radiotap.dbm_antsignal'
     ]
     if verbose:
-        print command
+        print(command)
     run_tshark = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, nothing = run_tshark.communicate()
     foundMacs = {}
     for line in output.decode('utf-8').split('\n'):
         if verbose:
-            print line
+            print(line)
         if len(line.strip()) == 0:
             continue
         mac = line.split()[0].strip()
@@ -140,7 +140,7 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
                 foundMacs[mac] = rssi
 
     if len(foundMacs) == 0:
-        print "Found no signals, are you sure %s supports monitor mode?" % adapter
+        print("Found no signals, are you sure %s supports monitor mode?" % adapter)
         return
 
     cellphone = [
@@ -178,22 +178,22 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
                            percentage_of_people_with_phones))
 
     if number and not jsonprint:
-        print num_people
+        print(num_people)
     elif jsonprint:
-        print json.dumps(cellphone_people, indent=2)
+        print(json.dumps(cellphone_people, indent=2))
     else:
         if num_people == 0:
-            print "No one around (not even you!)."
+            print("No one around (not even you!).")
         elif num_people == 1:
-            print "No one around, but you."
+            print("No one around, but you.")
         else:
-            print "There are about %d people around." % num_people
+            print("There are about %d people around." % num_people)
 
     if len(out) > 0:
         with open(out, 'w') as f:
             f.write(json.dumps(cellphone_people, indent=2))
         if verbose:
-            print "Wrote data to %s" % out
+            print("Wrote data to %s" % out)
     os.remove('/tmp/tshark-temp')
 
 
