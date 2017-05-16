@@ -97,6 +97,7 @@ Options:
   -n, --nearby         only quantify signals that are nearby (rssi > -70)
   --nocorrection       do not apply correction
   --loop               loop forever
+  --sort               sort cellphone data by distance (rssi)
 ```
 
 ### Print JSON
