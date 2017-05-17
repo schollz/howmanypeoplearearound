@@ -1,13 +1,15 @@
 import threading
 import sys
 import os
+import platform
 import subprocess
 import json
 import time
 import datetime
 
+import netifaces
+from pick import pick
 import click
-# from pick import pick
 
 from howmanypeoplearearound.oui import *
 
@@ -49,7 +51,7 @@ def showTimer(timeleft):
 
 
 @click.command()
-@click.option('-a', '--adapter', prompt='Specify WiFi adapter (use ifconfig to determine)', help='adapter to use')
+@click.option('-a', '--adapter', default='', help='adapter to use')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
 @click.option('-o', '--out', default='', help='output cellphone data to file')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
@@ -71,14 +73,18 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
 def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop):
     """Monitor wifi signals to count the number of people around you"""
 
-    # Sanitize input
-    #adapter = shlex.quote(adapter)
-    #scantime = shlex.quote(scantime)
+    # print("OS: " + os.name)
+    # print("Platform: " + platform.system())
 
     try:
         tshark = which("tshark")
     except:
-        print("tshark not found, install using\n\napt-get install tshark\n")
+        if platform.system() != 'Darwin':
+            print('tshark not found, install using\n\napt-get install tshark\n')
+        else:
+            print('wireshark not found, install using: \n\tbrew install wireshark')
+            print(
+                'you may also need to execute: \n\tbrew cask install wireshark-chmodbpf')
         return
 
     if jsonprint:
@@ -86,30 +92,24 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
     if number:
         verbose = False
 
-    # This part requires SUDO, maybe not use it
-    # adapters = []
-    # for line in subprocess.check_output(
-    #         ['ifconfig']).decode('utf-8').split('\n'):
-    #     if ' Link' in line and line[0] == 'w':
-    #         adapters.append(line.split()[0])
+    if len(adapter) == 0:
+        title = 'Please choose the adapter you want to use: '
+        adapter, index = pick(netifaces.interfaces(), title)
 
-    # if len(adapter) == 0:
-    #     title = 'Please choose the adapter you want to use: '
-    #     adapter, index = pick(adapters, title)
-    # if not number:
-    #     print("Using %s adapter and scanning for %s seconds..." %
-    #           (adapter, scantime))
+    print("Using %s adapter and scanning for %s seconds..." %
+          (adapter, scantime))
 
     if not number:
         # Start timer
         t1 = threading.Thread(target=showTimer, args=(scantime,))
+        t1.daemon = True
         t1.start()
 
     # Scan with tshark
     command = [tshark, '-I', '-i', adapter, '-a',
                'duration:' + scantime, '-w', '/tmp/tshark-temp']
     if verbose:
-        print(command)
+        print(' '.join(command))
     run_tshark = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, nothing = run_tshark.communicate()
@@ -117,11 +117,16 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
         t1.join()
 
     # Read tshark output
-    #command = "%s -r /tmp/tshark-temp -T fields -e wlan.sa -e wlan.bssid -e radiotap.dbm_antsignal" % tshark
-    command = [tshark, '-r', '/tmp/tshark-temp', '-T', 'fields', '-e',
-               'wlan.sa', '-e', 'wlan.bssid', '-e', 'radiotap.dbm_antsignal']
+    command = [
+        tshark, '-r',
+        '/tmp/tshark-temp', '-T',
+        'fields', '-e',
+        'wlan.sa', '-e',
+        'wlan.bssid', '-e',
+        'radiotap.dbm_antsignal'
+    ]
     if verbose:
-        print(command)
+        print(' '.join(command))
     run_tshark = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, nothing = run_tshark.communicate()
