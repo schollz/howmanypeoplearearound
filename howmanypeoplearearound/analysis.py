@@ -56,12 +56,12 @@ def analyze_file(fname):
         js += ('\n  y: [%s],' % ', '.join(mac_data[mac]['y']))
         js += ("\n name: '%s', mode: 'lines', type:'scatter' };\n\n" % mac)
     js += ('\n\nvar data = [%s];' % ', '.join(mac_names))
-    js += ("\n\nPlotly.newPlot('myDiv',data);")
+    js += ("\n\nPlotly.newPlot('myDiv',data,layout2);")
     js += ('\nvar num_cellphones = {')
     js += ('\n  x: timex,')
     js += ('\n  y: [%s],' % ', '.join(num['y']))
     js += ("\n name: 'N', mode: 'lines', type:'scatter' };\n\n")
-    js += ("\n\nPlotly.newPlot('myDiv2',[num_cellphones]);")
+    js += ("\n\nPlotly.newPlot('myDiv2',[num_cellphones],layout1);")
 
 
     with open('index.html','w') as f:
@@ -79,6 +79,44 @@ def analyze_file(fname):
             <!-- Plotly chart will be drawn inside this DIV -->
         </div>
         <script>
+var layout1 = {
+  title: 'Total Count',
+  xaxis: {
+    title: 'date',
+    titlefont: {
+      family: 'Courier New, monospace',
+      size: 18,
+      color: '#7f7f7f'
+    }
+  },
+  yaxis: {
+    title: 'number',
+    titlefont: {
+      family: 'Courier New, monospace',
+      size: 18,
+      color: '#7f7f7f'
+    }
+  }
+};
+var layout2 = {
+  title: 'Individual traces',
+  xaxis: {
+    title: 'date',
+    titlefont: {
+      family: 'Courier New, monospace',
+      size: 18,
+      color: '#7f7f7f'
+    }
+  },
+  yaxis: {
+    title: 'rssi',
+    titlefont: {
+      family: 'Courier New, monospace',
+      size: 18,
+      color: '#7f7f7f'
+    }
+  }
+};
     %s
         </script>
     </body>""" % (plotlyjs,js))

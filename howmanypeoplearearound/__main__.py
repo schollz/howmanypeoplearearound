@@ -53,7 +53,7 @@ def showTimer(timeleft):
 
 @click.command()
 @click.option('-a', '--adapter', default='', help='adapter to use')
-@click.option('-z', '--analyze', prompt='Which file to analyze', help='analyze file')
+@click.option('-z', '--analyze', default='', help='analyze file')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
 @click.option('-o', '--out', default='', help='output cellphone data to file')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
