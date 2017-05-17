@@ -8,7 +8,7 @@ with open('whoisaround.json', 'r') as f:
     for line in f:
         data = json.loads(line)
         for c in data['cellphones']:
-            if c['rssi'] > -70 and c['mac'] not in macs_to_add:
+            if c['rssi'] > -80 and c['mac'] not in macs_to_add:
                 macs_to_add.append(c['mac'])
 
 print(macs_to_add)
@@ -37,9 +37,10 @@ for i, mac in enumerate(mac_names):
 # remove pings
 for mac in mac_data:
     for i, y in enumerate(mac_data[mac]['y']):
-        if y == "0" and i > 1:
-            if mac_data[mac]['y'][i - 2] == "0" and mac_data[mac]['y'][i - 1] != "0":
+        if y == "0" and i > 2:
+            if mac_data[mac]['y'][i - 3] == "0" and (mac_data[mac]['y'][i - 1] != "0" or mac_data[mac]['y'][i - 2] != "0"):
                 mac_data[mac]['y'][i - 1] = "0"
+                mac_data[mac]['y'][i - 2] = "0"
 
 with open('data.js', 'w') as f:
     for i, mac in enumerate(macs_to_add):
