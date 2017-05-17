@@ -14,7 +14,9 @@ with open('whoisaround.json', 'r') as f:
 print(macs_to_add)
 mac_data = {}
 for mac in macs_to_add:
-    mac_data[mac] = {'x': [], 'y': []}
+    mac_data[mac] = {'y': []}
+
+num = {'x': [], 'y': []}
 
 with open('whoisaround.json', 'r') as f:
     for line in f:
@@ -26,9 +28,10 @@ with open('whoisaround.json', 'r') as f:
                 if c['mac'] in rssi:
                     rssi[c['mac']] = c['rssi']
         for mac in mac_data:
-            mac_data[mac]['x'].append("'" + datetime.datetime.fromtimestamp(
-                data['time']).isoformat().split('.')[0].replace('T', ' ') + "'")
             mac_data[mac]['y'].append(str(rssi[mac] + 100))
+        num['x'].append("'" + datetime.datetime.fromtimestamp(
+                data['time']).isoformat().split('.')[0].replace('T', ' ') + "'")
+        num['y'].append(str(len(data['cellphones'])))
 
 mac_names = copy.deepcopy(macs_to_add)
 for i, mac in enumerate(mac_names):
@@ -42,47 +45,38 @@ for mac in mac_data:
                 mac_data[mac]['y'][i - 1] = "0"
                 mac_data[mac]['y'][i - 2] = "0"
 
-with open('data.js', 'w') as f:
-    for i, mac in enumerate(macs_to_add):
-        f.write('\nvar %s = {' % mac_names[i])
-        f.write('\n  x: [%s],' % ', '.join(mac_data[mac]['x']))
-        f.write('\n  y: [%s],' % ', '.join(mac_data[mac]['y']))
-        f.write("\n name: '%s', mode: 'lines', type:'scatter' };\n\n" % mac)
-    f.write('\n\nvar data = [%s];' % ', '.join(mac_names))
-    f.write("\n\nPlotly.newPlot('myDiv',data);")
-# import matplotlib.pyplot as plt
 
-# t = []
-# n = []
-# with open('whoisaround.json','r') as f:
-# 	for line in f:
-# 		data = json.loads(line)
-# 		t.append(datetime.datetime.fromtimestamp(data['time']))
-# 		n.append(len(data['cellphones']))
+js = ""
+js += ('timex = [%s]' % ', '.join(num['x']))
+for i, mac in enumerate(macs_to_add):
+    js += ('\nvar %s = {' % mac_names[i])
+    js += ('\n  x: timex,')
+    js += ('\n  y: [%s],' % ', '.join(mac_data[mac]['y']))
+    js += ("\n name: '%s', mode: 'lines', type:'scatter' };\n\n" % mac)
+js += ('\n\nvar data = [%s];' % ', '.join(mac_names))
+js += ("\n\nPlotly.newPlot('myDiv',data);")
+js += ('\nvar num_cellphones = {')
+js += ('\n  x: timex,')
+js += ('\n  y: [%s],' % ', '.join(num['y']))
+js += ("\n name: 'N', mode: 'lines', type:'scatter' };\n\n")
+js += ("\n\nPlotly.newPlot('myDiv2',[num_cellphones]);")
 
-# plt.xlabel('time')
-# plt.ylabel('n')
-# plt.plot(t,n,'.-')
-# plt.plot(t,n,'.-')
-# plt.show()
 
-# rssi = {}
-# with open('whoisaround.json','r') as f:
-# 	for line in f:
-# 		data = json.loads(line)
-# 		for c in data['cellphones']:
-# 			if c['mac'] not in rssi:
-# 				rssi[c['mac']] = {'time':[],'rssi':[]}
-# 			rssi[c['mac']]['time'].append(datetime.datetime.fromtimestamp(data['time']))
-# 			rssi[c['mac']]['rssi'].append(c['rssi'])
+with open('index.html','w') as f:
+    f.write("""<head>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
 
-# plt.xlabel('time')
-# plt.ylabel('n')
-# for c in rssi:
-# 	worthPlotting = 0
-# 	for val in rssi[c]['rssi']:
-# 		if val > -60:
-# 			worthPlotting += 1
-# 	if worthPlotting > 12:
-# 		plt.plot(rssi[c]['time'],rssi[c]['rssi'],'.-')
-# plt.show()
+<body>
+    <div id="myDiv2" style="width: 950px; height: 400px;">
+        <!-- Plotly chart will be drawn inside this DIV -->
+    </div>
+
+    <div id="myDiv" style="width: 950px; height: 400px;">
+        <!-- Plotly chart will be drawn inside this DIV -->
+    </div>
+    <script>
+%s
+    </script>
+</body>""" % js)
