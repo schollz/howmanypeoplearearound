@@ -12,6 +12,7 @@ from pick import pick
 import click
 
 from howmanypeoplearearound.oui import *
+from howmanypeoplearearound.analysis import *
 
 
 def which(program):
@@ -52,6 +53,7 @@ def showTimer(timeleft):
 
 @click.command()
 @click.option('-a', '--adapter', default='', help='adapter to use')
+@click.option('-z', '--analyze', prompt='Which file to analyze', help='analyze file')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
 @click.option('-o', '--out', default='', help='output cellphone data to file')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
@@ -60,7 +62,10 @@ def showTimer(timeleft):
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
 @click.option('--loop', help='loop forever', is_flag=True)
-def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop):
+def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop, analyze):
+    if analyze != '':
+        analyze_file(analyze)
+        return
     if loop:
         while True:
             scan(adapter, scantime, verbose, number,

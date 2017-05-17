@@ -89,7 +89,7 @@ You can also generate an JSON-formatted output to see what kind of phones are ar
 $ howmanypeoplearearound -o test.json -a wlan1
 [==================================================] 100%         0s left
 There are about 4 people around.
-$ cat test.json
+$ cat test.json | python3 -m json.tool
 [
   {
     "rssi": -86.0,
@@ -109,13 +109,20 @@ $ cat test.json
 ]
 ```
 
-A higher rssi means closer (one of these phones is mine, and the other two are my roommates' who were upstairs).
+A higher rssi means closer (one of these phones is mine, and the other two are my roommates' who were upstairs). You can add `--loop` to make this run forever and append new lines the file:
 
-You can create a log file with the number of people this one-liner (make sure to change your adapter):
+```bash
+$  howmanypeoplearearound -o test.json -a wlan1 --loop
+```
 
+And then you can visualize the data too, with
+
+```bash
+$ howmanypeoplearearound --analyze test.json 
+Wrote index.html (just open in a web browser)
 ```
-$  while :; do echo "`date` `howmanypeoplearearound --number -a wlan1 -s 180`" >> log; sleep 1; done
-```
+
+
 
 How does it work?
 ==================
