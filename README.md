@@ -25,7 +25,13 @@ Personally I prefer the [TN722N](http://www.ebay.com/sch/i.html?_pgn=1&isRefine=
 is only ~$10 and works great with every model of the Raspberry Pi. [Here is a good list of adapters that support 'ad-hoc' mode](http://elinux.org/RPi_USB_Wi-Fi_Adapters) for the
 Raspberry Pi.
 
-### [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) 
+### OSX / Mac
+```
+  brew install wireshark
+  brew cask install wireshark-chmodbpf
+```
+
+### Linux [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) 
 
 ```
 sudo apt-get install tshark
