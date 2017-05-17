@@ -1,44 +1,14 @@
-<html>
 <head>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
-<body>
-    <script>
-        // Nice RSSI-timeseries with expandable datetimes
-        // https://eventbrite.github.io/britecharts/tutorial-line.html
-    <script>
-        // Regular RSSI-timeseries plot
-        // http://bl.ocks.org/ZJONSSON/3918369
-    </script>
-    <script>
-        // Realtime plot
-        // http://bl.ocks.org/simenbrekken/6634070
-    </script>
-    <script>
-        // Use local storage to set who belongs to each mac address
-        // http://jsfiddle.net/xdsb2pon/1/
-    </script>
-<script>
-// http://stackoverflow.com/questions/14388452/how-do-i-load-a-json-object-from-a-file-with-ajax
-function fetchJSONFile(path, callback) {
-    var httpRequest = new XMLHttpRequest();
-    httpRequest.onreadystatechange = function() {
-        if (httpRequest.readyState === 4) {
-            if (httpRequest.status === 200) {
-                var data = JSON.parse(httpRequest.responseText);
-                if (callback) callback(data);
-            }
-        }
-    };
-    httpRequest.open('GET', path);
-    httpRequest.send(); 
-}
 
-// this requests the file and executes a callback with the parsed result once
-//   it is available
-fetchJSONFile('pathToFile.json', function(data){
-    // do something with your data
-    console.log(data);
-});
-</script>
+<body>
+
+    <div id="myDiv" style="width: 950px; height: 400px;">
+        <!-- Plotly chart will be drawn inside this DIV -->
+    </div>
+    <script src="data.js">
+
+    </script>
 </body>
-</html>
