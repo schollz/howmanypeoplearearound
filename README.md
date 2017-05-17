@@ -115,12 +115,18 @@ A higher rssi means closer (one of these phones is mine, and the other two are m
 $  howmanypeoplearearound -o test.json -a wlan1 --loop
 ```
 
-And then you can visualize the data too, with
+You can visualize the data via a browser using:
 
 ```bash
 $ howmanypeoplearearound --analyze test.json 
 Wrote index.html (just open in a web browser)
 ```
+
+Then just open up `index.html` in a browser and you should see plots like:
+
+![newplot](https://cloud.githubusercontent.com/assets/6550035/26174159/b478b764-3b0b-11e7-9600-2aa215b789d0.png)
+
+![newplot 1](https://cloud.githubusercontent.com/assets/6550035/26174160/b4911ae8-3b0b-11e7-93b2-92c3efaa01aa.png)
 
 
 

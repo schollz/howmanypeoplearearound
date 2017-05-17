@@ -71,11 +71,11 @@ def analyze_file(fname):
     </head>
 
     <body>
-        <div id="myDiv2" style="width: 950px; height: 400px;">
+        <div id="myDiv2" style="width: 950px; height: 350px;">
             <!-- Plotly chart will be drawn inside this DIV -->
         </div>
 
-        <div id="myDiv" style="width: 950px; height: 400px;">
+        <div id="myDiv" style="width: 950px; height: 350px;">
             <!-- Plotly chart will be drawn inside this DIV -->
         </div>
         <script>
