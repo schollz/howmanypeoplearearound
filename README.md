@@ -71,7 +71,7 @@ There are about 3 people around.
 You will be prompted for the WiFi adapter to use for scanning. Make sure to use
 an adapter that supports "monitor" mode.
 
-### Options
+#### Options
 
 You can modify the scan time, designate the adapter, or modify the output using some command-line options.
 
