@@ -138,9 +138,11 @@ $ howmanypeoplearearound --analyze test.json
 Wrote index.html (just open in a web browser)
 ```
 
-Then just open up `index.html` in a browser and you should see plots like:
+Then just open up `index.html` in a browser and you should see plots. The first plot shows the number of people over time. Here you can see that people start arriving at work place around 8-9am (when work starts!).
 
 ![newplot](https://cloud.githubusercontent.com/assets/6550035/26174159/b478b764-3b0b-11e7-9600-2aa215b789d0.png)
+
+The second plot shows the RSSI values for the mac addresses seen. You can double-click on one of them in particular to highlight that trajectory, as I have done here for my phone (you can see when I leave from and when I arrive to work!):
 
 ![newplot 1](https://cloud.githubusercontent.com/assets/6550035/26174160/b4911ae8-3b0b-11e7-93b2-92c3efaa01aa.png)
 
