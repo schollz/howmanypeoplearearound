@@ -57,15 +57,21 @@ pip install howmanypeoplearearound
 
 ## Run
 
-First determine which adapter you want to use to scan (usually its `wlan1`), which you can find the name of using `ifconfig`. Then, to run, just type in
+### Quickstart
+
+To run, simply type in
 
 ```bash
 $ howmanypeoplearearound
-Specify WiFi adapter (use ifconfig to determine): wlan1
 Using wlan1 adapter and scanning for 60 seconds...
 [==================================================] 100%        0s left
 There are about 3 people around.
 ```
+
+You will be prompted for the WiFi adapter to use for scanning. Make sure to use
+an adapter that supports "monitor" mode.
+
+#### Options
 
 You can modify the scan time, designate the adapter, or modify the output using some command-line options.
 
@@ -74,22 +80,26 @@ $ howmanypeoplearearound --help
 
 Options:
   -a, --adapter TEXT   adapter to use
+  -z, --analyze TEXT   analyze file
   -s, --scantime TEXT  time in seconds to scan
   -o, --out TEXT       output cellphone data to file
   -v, --verbose        verbose mode
   --number             just print the number
   -j, --jsonprint      print JSON of cellphone data
   -n, --nearby         only quantify signals that are nearby (rssi > -70)
-  --help               Show this message and exit.
+  --nocorrection       do not apply correction
+  --loop               loop forever
 ```
 
-You can also generate an JSON-formatted output to see what kind of phones are around:
+### Print JSON
+
+You can generate an JSON-formatted output to see what kind of phones are around:
 
 ```bash
 $ howmanypeoplearearound -o test.json -a wlan1
 [==================================================] 100%         0s left
 There are about 4 people around.
-$ cat test.json
+$ cat test.json | python3 -m json.tool
 [
   {
     "rssi": -86.0,
@@ -109,13 +119,33 @@ $ cat test.json
 ]
 ```
 
-A higher rssi means closer (one of these phones is mine, and the other two are my roommates' who were upstairs).
+A higher rssi means closer (one of these phones is mine, and the other two are my roommates' who were upstairs). 
 
-You can create a log file with the number of people this one-liner (make sure to change your adapter):
+### Run forever
 
+You can add `--loop` to make this run forever and append new lines an output file, `test.json`:
+
+```bash
+$ howmanypeoplearearound -o test.json -a wlan1 --loop
 ```
-$  while :; do echo "`date` `howmanypeoplearearound --number -a wlan1 -s 180`" >> log; sleep 1; done
+
+### Visualize 
+
+You can visualize the output from a looped command via a browser using:
+
+```bash
+$ howmanypeoplearearound --analyze test.json 
+Wrote index.html (just open in a web browser)
 ```
+
+Then just open up `index.html` in a browser and you should see plots. The first plot shows the number of people over time. Here you can see that people start arriving at work place around 8-9am (when work starts!).
+
+![newplot](https://cloud.githubusercontent.com/assets/6550035/26174159/b478b764-3b0b-11e7-9600-2aa215b789d0.png)
+
+The second plot shows the RSSI values for the mac addresses seen. You can double-click on one of them in particular to highlight that trajectory, as I have done here for my phone (you can see when I leave from and when I arrive to work!):
+
+![newplot 1](https://cloud.githubusercontent.com/assets/6550035/26174160/b4911ae8-3b0b-11e7-93b2-92c3efaa01aa.png)
+
 
 How does it work?
 ==================

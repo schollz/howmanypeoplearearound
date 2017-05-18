@@ -12,6 +12,7 @@ from pick import pick
 import click
 
 from howmanypeoplearearound.oui import *
+from howmanypeoplearearound.analysis import *
 
 
 def which(program):
@@ -52,6 +53,7 @@ def showTimer(timeleft):
 
 @click.command()
 @click.option('-a', '--adapter', default='', help='adapter to use')
+@click.option('-z', '--analyze', default='', help='analyze file')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
 @click.option('-o', '--out', default='', help='output cellphone data to file')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
@@ -59,7 +61,22 @@ def showTimer(timeleft):
 @click.option('-j', '--jsonprint', help='print JSON of cellphone data', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
-def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection):
+@click.option('--loop', help='loop forever', is_flag=True)
+@click.option('--port', default=8001, help='port to use when serving analysis')
+def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop, analyze, port):
+    if analyze != '':
+        analyze_file(analyze, port)
+        return
+    if loop:
+        while True:
+            scan(adapter, scantime, verbose, number,
+                 nearby, jsonprint, out, nocorrection, loop)
+    else:
+        scan(adapter, scantime, verbose, number,
+             nearby, jsonprint, out, nocorrection, loop)
+
+
+def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop):
     """Monitor wifi signals to count the number of people around you"""
 
     # print("OS: " + os.name)
@@ -126,15 +143,20 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
         if len(line.strip()) == 0:
             continue
         mac = line.split()[0].strip()
-        if mac not in foundMacs:
+        dats = line.split()
+        if len(dats) == 3:
+            if ':' not in dats[0] or len(dats) != 3:
+                continue
+            if mac not in foundMacs:
+                foundMacs[mac] = []
             rssi = 0
-            dats = line.split()
-            if len(dats) == 3:
-                if ':' not in dats[0]:
-                    continue
-                rssi = float(dats[2].split(',')[0]) / 2 + \
-                    float(dats[2].split(',')[0]) / 2
-                foundMacs[mac] = rssi
+            rssi = float(dats[2].split(',')[0]) / 2 + \
+                float(dats[2].split(',')[0]) / 2
+            foundMacs[mac].append(rssi)
+
+    for mac in foundMacs:
+        foundMacs[mac] = float(sum(foundMacs[mac])) / \
+            float(len(foundMacs[mac]))
 
     if len(foundMacs) == 0:
         print("Found no signals, are you sure %s supports monitor mode?" % adapter)
@@ -187,8 +209,9 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
             print("There are about %d people around." % num_people)
 
     if len(out) > 0:
-        with open(out, 'w') as f:
-            f.write(json.dumps(cellphone_people, indent=2))
+        with open(out, 'a') as f:
+            data_dump = {'cellphones': cellphone_people, 'time': time.time()}
+            f.write(json.dumps(data_dump) + "\n")
         if verbose:
             print("Wrote data to %s" % out)
     os.remove('/tmp/tshark-temp')
