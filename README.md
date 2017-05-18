@@ -131,7 +131,7 @@ $ howmanypeoplearearound -o test.json -a wlan1 --loop
 
 ### Visualize 
 
-You can visualize the data via a browser using:
+You can visualize the output from a looped command via a browser using:
 
 ```bash
 $ howmanypeoplearearound --analyze test.json 
