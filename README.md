@@ -135,7 +135,9 @@ You can visualize the output from a looped command via a browser using:
 
 ```bash
 $ howmanypeoplearearound --analyze test.json 
-Wrote index.html (just open in a web browser)
+Wrote index.html
+Open browser to http://localhost:8001
+Type Ctl+C to exit
 ```
 
 Then just open up `index.html` in a browser and you should see plots. The first plot shows the number of people over time. Here you can see that people start arriving at work place around 8-9am (when work starts!).
