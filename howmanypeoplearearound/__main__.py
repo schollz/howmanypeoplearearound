@@ -62,9 +62,10 @@ def showTimer(timeleft):
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
 @click.option('--loop', help='loop forever', is_flag=True)
-def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop, analyze):
+@click.option('--port', default=8001, help='port to use when serving analysis')
+def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop, analyze, port):
     if analyze != '':
-        analyze_file(analyze)
+        analyze_file(analyze, port)
         return
     if loop:
         while True:

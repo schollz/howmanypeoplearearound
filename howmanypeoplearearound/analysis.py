@@ -2,10 +2,12 @@ import json
 import time
 import datetime
 import copy
+import sys
 
 from howmanypeoplearearound.plotlyjs import *
 
-def analyze_file(fname):
+
+def analyze_file(fname, port):
     macs_to_add = []
     with open(fname, 'r') as f:
         for line in f:
@@ -32,7 +34,7 @@ def analyze_file(fname):
             for mac in mac_data:
                 mac_data[mac]['y'].append(str(rssi[mac] + 100))
             num['x'].append("'" + datetime.datetime.fromtimestamp(
-                    data['time']).isoformat().split('.')[0].replace('T', ' ') + "'")
+                data['time']).isoformat().split('.')[0].replace('T', ' ') + "'")
             num['y'].append(str(len(data['cellphones'])))
 
     mac_names = copy.deepcopy(macs_to_add)
@@ -46,7 +48,6 @@ def analyze_file(fname):
                 if mac_data[mac]['y'][i - 3] == "0" and (mac_data[mac]['y'][i - 1] != "0" or mac_data[mac]['y'][i - 2] != "0"):
                     mac_data[mac]['y'][i - 1] = "0"
                     mac_data[mac]['y'][i - 2] = "0"
-
 
     js = ""
     js += ('timex = [%s]' % ', '.join(num['x']))
@@ -63,11 +64,10 @@ def analyze_file(fname):
     js += ("\n name: 'N', mode: 'lines', type:'scatter' };\n\n")
     js += ("\n\nPlotly.newPlot('myDiv2',[num_cellphones],layout1);")
 
-
-    with open('index.html','w') as f:
-        f.write("""<head>
+    with open('index.html', 'w') as f:
+        f.write("""<html><head>
         <!-- Plotly.js -->
-        <script>%s</script>
+        <script type="text/javascript" src="https://cdn.plot.ly/plotly-1.5.0.min.js"></script>
     </head>
 
     <body>
@@ -119,6 +119,18 @@ var layout2 = {
 };
     %s
         </script>
-    </body>""" % (plotlyjs,js))
-
-    print("Wrote index.html (just open in a web browser)")
+    </body></html>""" % (js))
+    print("Wrote index.html")
+    print("Open browser to http://localhost:" + str(port))
+    print("Type Ctl+C to exit")
+    if (sys.version_info > (3, 0)):
+        # Python 3 code in this block
+        from http.server import HTTPServer, SimpleHTTPRequestHandler
+        httpd = HTTPServer(('localhost', port), SimpleHTTPRequestHandler)
+        httpd.serve_forever()
+    else:
+        # Python 2 code in this block
+        import SimpleHTTPServer
+        import SocketServer
+        httpd = SocketServer.TCPServer(("", port), SimpleHTTPServer.SimpleHTTPRequestHandler)
+        httpd.serve_forever()
