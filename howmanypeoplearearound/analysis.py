@@ -67,7 +67,7 @@ def analyze_file(fname, port):
     with open('index.html', 'w') as f:
         f.write("""<html><head>
         <!-- Plotly.js -->
-        <script type="text/javascript" src="https://cdn.plot.ly/plotly-1.5.0.min.js"></script>
+        <script type="text/javascript" src="https://cdn.plot.ly/plotly-1.27.0.min.js"></script>
     </head>
 
     <body>
