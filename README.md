@@ -123,7 +123,7 @@ A higher rssi means closer (one of these phones is mine, and the other two are m
 
 ### Run forever
 
-You can add `--loop` to make this run forever and append new lines the file:
+You can add `--loop` to make this run forever and append new lines an output file, `test.json`:
 
 ```bash
 $ howmanypeoplearearound -o test.json -a wlan1 --loop
