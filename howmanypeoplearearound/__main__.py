@@ -105,6 +105,7 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
             print('You must specify the adapter with   -a ADAPTER')
             print('Choose from the following: ' +
                   ', '.join(netifaces.interfaces()))
+            return
         title = 'Please choose the adapter you want to use: '
         adapter, index = pick(netifaces.interfaces(), title)
 
