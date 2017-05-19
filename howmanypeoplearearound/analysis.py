@@ -1,41 +1,33 @@
-import json
-import time
-import datetime
 import copy
+import datetime
+import json
 import sys
 
 from howmanypeoplearearound.plotlyjs import *
 
 
 def analyze_file(fname, port):
+    with open(fname, 'r') as f:
+        lines = [json.loads(line) for line in f]
     macs_to_add = []
-    with open(fname, 'r') as f:
-        for line in f:
-            data = json.loads(line)
-            for c in data['cellphones']:
-                if c['rssi'] > -80 and c['mac'] not in macs_to_add:
-                    macs_to_add.append(c['mac'])
-
-    mac_data = {}
-    for mac in macs_to_add:
-        mac_data[mac] = {'y': []}
-
+    for data in lines:
+        for c in data['cellphones']:
+            if c['rssi'] > -80:
+                macs_to_add.append(c['mac'])
+    mac_data = {mac: {'y': []} for mac in set(macs_to_add)}
     num = {'x': [], 'y': []}
-
-    with open(fname, 'r') as f:
-        for line in f:
-            data = json.loads(line)
-            rssi = {}
-            for mac in macs_to_add:
-                rssi[mac] = -100
-                for c in data['cellphones']:
-                    if c['mac'] in rssi:
-                        rssi[c['mac']] = c['rssi']
-            for mac in mac_data:
-                mac_data[mac]['y'].append(str(rssi[mac] + 100))
-            num['x'].append("'" + datetime.datetime.fromtimestamp(
-                data['time']).isoformat().split('.')[0].replace('T', ' ') + "'")
-            num['y'].append(str(len(data['cellphones'])))
+    for data in lines:
+        rssi = {}
+        for mac in macs_to_add:
+            rssi[mac] = -100
+            for c in data['cellphones']:
+                if c['mac'] in rssi:
+                    rssi[c['mac']] = c['rssi']
+        for mac in mac_data:
+            mac_data[mac]['y'].append(str(rssi[mac] + 100))
+        num['x'].append("'" + datetime.datetime.fromtimestamp(
+            data['time']).isoformat().split('.')[0].replace('T', ' ') + "'")
+        num['y'].append(str(len(data['cellphones'])))
 
     mac_names = copy.deepcopy(macs_to_add)
     for i, mac in enumerate(mac_names):
@@ -123,7 +115,7 @@ var layout2 = {
     print("Wrote index.html")
     print("Open browser to http://localhost:" + str(port))
     print("Type Ctl+C to exit")
-    if (sys.version_info > (3, 0)):
+    if sys.version_info >= (3, 0):
         # Python 3 code in this block
         from http.server import HTTPServer, SimpleHTTPRequestHandler
         httpd = HTTPServer(('localhost', port), SimpleHTTPRequestHandler)
