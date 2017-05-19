@@ -148,7 +148,7 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
             print(line)
         if len(line.strip()) == 0:
             continue
-        mac = line.split()[0].strip()
+        mac = line.split()[0].strip().split(',')[0]
         dats = line.split()
         if len(dats) == 3:
             if ':' not in dats[0] or len(dats) != 3:
