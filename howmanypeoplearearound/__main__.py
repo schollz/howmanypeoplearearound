@@ -8,7 +8,8 @@ import time
 import datetime
 
 import netifaces
-from pick import pick
+if os.name != 'nt':
+    from pick import pick
 import click
 
 from howmanypeoplearearound.oui import *
@@ -100,6 +101,10 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         verbose = False
 
     if len(adapter) == 0:
+        if os.name == 'nt':
+            print('You must specify the adapter with   -a ADAPTER')
+            print('Choose from the following: ' +
+                  ', '.join(netifaces.interfaces()))
         title = 'Please choose the adapter you want to use: '
         adapter, index = pick(netifaces.interfaces(), title)
 
