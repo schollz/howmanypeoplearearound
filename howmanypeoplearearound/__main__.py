@@ -60,23 +60,24 @@ def showTimer(timeleft):
 @click.option('--number', help='just print the number', is_flag=True)
 @click.option('-j', '--jsonprint', help='print JSON of cellphone data', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
+@click.option('--allmacaddresses', help='do not check MAC addresses against the OUI database to only recognize known cellphone manufacturers', is_flag=True)
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
 @click.option('--loop', help='loop forever', is_flag=True)
 @click.option('--port', default=8001, help='port to use when serving analysis')
-def main(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop, analyze, port):
+def main(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port):
     if analyze != '':
         analyze_file(analyze, port)
         return
     if loop:
         while True:
             scan(adapter, scantime, verbose, number,
-                 nearby, jsonprint, out, nocorrection, loop)
+                 nearby, jsonprint, out, allmacaddresses, nocorrection, loop)
     else:
         scan(adapter, scantime, verbose, number,
-             nearby, jsonprint, out, nocorrection, loop)
+             nearby, jsonprint, out, allmacaddresses, nocorrection, loop)
 
 
-def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrection, loop):
+def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop):
     """Monitor wifi signals to count the number of people around you"""
 
     # print("OS: " + os.name)
@@ -177,14 +178,15 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, nocorrectio
 
     cellphone_people = []
     for mac in foundMacs:
+        oui_id = 'Not in OUI'
         if mac[:8] in oui:
             oui_id = oui[mac[:8]]
-            if verbose:
-                print(mac, oui_id, oui_id in cellphone)
-            if oui_id in cellphone:
-                if not nearby or (nearby and foundMacs[mac] > -70):
-                    cellphone_people.append(
-                        {'company': oui_id, 'rssi': foundMacs[mac], 'mac': mac})
+        if verbose:
+            print(mac, oui_id, oui_id in cellphone)
+        if allmacaddresses or oui_id in cellphone:
+            if not nearby or (nearby and foundMacs[mac] > -70):
+                cellphone_people.append(
+                    {'company': oui_id, 'rssi': foundMacs[mac], 'mac': mac})
 
     if verbose:
         print(json.dumps(cellphone_people, indent=2))
