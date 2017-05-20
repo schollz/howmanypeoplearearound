@@ -157,8 +157,11 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
             if mac not in foundMacs:
                 foundMacs[mac] = []
             rssi = 0
-            rssi = float(dats[2].split(',')[0]) / 2 + \
-                float(dats[2].split(',')[0]) / 2
+            if len(dats[2].split(',') > 1)
+                rssi = float(dats[2].split(',')[0]) / 2 + \
+                    float(dats[2].split(',')[1]) / 2
+            else:
+                rssi = float(dats[2].split(',')[0])
             foundMacs[mac].append(rssi)
 
     for mac in foundMacs:
@@ -180,6 +183,8 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         'LG ELECTRONICS INC',
         'Apple, Inc.',
         'LG Electronics',
+        'OnePlus Tech (Shenzhen) Ltd',
+        'Xiaomi Communications Co Ltd',
         'LG Electronics (Mobile Communications)']
 
     cellphone_people = []
