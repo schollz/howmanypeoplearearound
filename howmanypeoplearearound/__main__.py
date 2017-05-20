@@ -157,7 +157,7 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
             if mac not in foundMacs:
                 foundMacs[mac] = []
             rssi = 0
-            if len(dats[2].split(',') > 1)
+            if len(dats[2].split(',')) > 1:
                 rssi = float(dats[2].split(',')[0]) / 2 + \
                     float(dats[2].split(',')[1]) / 2
             else:
