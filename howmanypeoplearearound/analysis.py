@@ -12,9 +12,9 @@ def analyze_file(fname, port):
     macs_to_add = []
     for data in lines:
         for c in data['cellphones']:
-            if c['rssi'] > -80:
+            if c['rssi'] > -80 and c['mac'] not in macs_to_add:
                 macs_to_add.append(c['mac'])
-    mac_data = {mac: {'y': []} for mac in set(macs_to_add)}
+    mac_data = {mac: {'y': []} for mac in macs_to_add}
     num = {'x': [], 'y': []}
     for data in lines:
         rssi = {}
