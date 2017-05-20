@@ -153,10 +153,15 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         if len(dats) == 3 and ':' in dats[0]:
             if mac not in foundMacs:
                 foundMacs[mac] = []
-            rssi = float(dats[2].split(',')[0]) / 2
-            foundMacs[mac].append(rssi + rssi)
+            rssi = 0
+            if len(dats[2].split(',')) > 1:
+                rssi = float(dats[2].split(',')[0]) / 2 + \
+                    float(dats[2].split(',')[1]) / 2
+            else:
+                rssi = float(dats[2].split(',')[0])
+            foundMacs[mac].append(rssi)
 
-    if not foundMacs):
+    if not foundMacs:
         print("Found no signals, are you sure %s supports monitor mode?" % adapter)
         return
     
@@ -175,6 +180,8 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         'LG ELECTRONICS INC',
         'Apple, Inc.',
         'LG Electronics',
+        'OnePlus Tech (Shenzhen) Ltd',
+        'Xiaomi Communications Co Ltd',
         'LG Electronics (Mobile Communications)']
 
     cellphone_people = []
