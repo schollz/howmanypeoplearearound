@@ -14,6 +14,6 @@ RUN apt-get update \
  && newgrp wireshark \
  && pip install howmanypeoplearearound \
  && echo "================================================================================" \
- && echo "Please type: docker run -it --name howmanypeoplearearound howmanypeoplearearound"
+ && echo "Please type: docker run -it --net=host --name howmanypeoplearearound howmanypeoplearearound"
 
 CMD [ "howmanypeoplearearound" ]
