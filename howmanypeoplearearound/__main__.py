@@ -5,7 +5,6 @@ import platform
 import subprocess
 import json
 import time
-import datetime
 
 import netifaces
 if os.name != 'nt':
@@ -147,7 +146,7 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
     for line in output.decode('utf-8').split('\n'):
         if verbose:
             print(line)
-        if len(line.strip()) == 0:
+        if line.strip() == '':
             continue
         mac = line.split()[0].strip().split(',')[0]
         dats = line.split()
@@ -156,21 +155,20 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
                 continue
             if mac not in foundMacs:
                 foundMacs[mac] = []
-            rssi = 0
-            if len(dats[2].split(',')) > 1:
-                rssi = float(dats[2].split(',')[0]) / 2 + \
-                    float(dats[2].split(',')[1]) / 2
+            dats_2_split = dats[2].split(',')
+            if len(dats_2_split) > 1:
+                rssi = float(dats_2_split[0]) / 2 + float(dats_2_split[1]) / 2
             else:
-                rssi = float(dats[2].split(',')[0])
+                rssi = float(dats_2_split[0])
             foundMacs[mac].append(rssi)
 
-    for mac in foundMacs:
-        foundMacs[mac] = float(sum(foundMacs[mac])) / \
-            float(len(foundMacs[mac]))
-
-    if len(foundMacs) == 0:
+    if not foundMacs:
         print("Found no signals, are you sure %s supports monitor mode?" % adapter)
         return
+
+    for mac in foundMacs:
+        foundMacs[mac] = (float(sum(foundMacs[mac])) /
+            float(len(foundMacs[mac])))
 
     cellphone = [
         'Motorola Mobility LLC, a Lenovo Company',
@@ -221,12 +219,12 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         else:
             print("There are about %d people around." % num_people)
 
-    if len(out) > 0:
+    if out:
         with open(out, 'a') as f:
             data_dump = {'cellphones': cellphone_people, 'time': time.time()}
             f.write(json.dumps(data_dump) + "\n")
         if verbose:
-            print("Wrote data to %s" % out)
+            print("Wrote %d records to %s" % (cellphone_people, out))
     os.remove('/tmp/tshark-temp')
 
 
