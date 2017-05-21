@@ -10,10 +10,10 @@ RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y tshark \
  && yes | dpkg-reconfigure -f noninteractive wireshark-common \
  && addgroup wireshark \
-#&& usermod -a -G wireshark $USER \  # Not really essential since $USER is blank and user is root
+ && usermod -a -G wireshark ${USER:-root} \
  && newgrp wireshark \
  && pip install howmanypeoplearearound \
- && echo "=====================================================================================" \
- && echo "Please type: docker run -it --rm --name howmanypeoplearearound howmanypeoplearearound"
+ && echo "================================================================================" \
+ && echo "Please type: docker run -it --name howmanypeoplearearound howmanypeoplearearound"
 
 CMD [ "howmanypeoplearearound" ]
