@@ -13,7 +13,7 @@ RUN apt-get update \
  && usermod -a -G wireshark ${USER:-root} \
  && newgrp wireshark \
  && pip install howmanypeoplearearound \
- && echo "================================================================================" \
+ && echo "===========================================================================================" \
  && echo "Please type: docker run -it --net=host --name howmanypeoplearearound howmanypeoplearearound"
 
 CMD [ "howmanypeoplearearound" ]
