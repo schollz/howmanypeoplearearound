@@ -13,6 +13,8 @@ Tested on Linux (Raspbian and Ubuntu) and macOS.
 
 ### **It may be illegal** to monitor networks for MAC addresses, especially on networks that *you do not own*. Please check your country's laws (for US [Section 18 U.S. Code § 2511](https://www.law.cornell.edu/uscode/text/18/2511)) - [discussion](https://github.com/schollz/howmanypeoplearearound/issues/4).
 
+[![Build Status](https://travis-ci.org/schollz/howmanypeoplearearound.svg?branch=master)](https://travis-ci.org/schollz/howmanypeoplearearound)
+
 Getting started
 ===============
 
