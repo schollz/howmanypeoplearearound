@@ -16,6 +16,14 @@ Tested on Linux (Raspbian and Ubuntu) and macOS.
 Getting started
 ===============
 
+## Docker alternative
+
+If you have Docker installed on your machine and you want to take *howmanypeoplearearound* out for a quick spin, you can try the following:
+1. Copy Dockerfile from this repo in your current working directory
+2. `docker build -t howmanypeoplearearound .`  # that . at the end is important
+3. `docker run -it --net=host --name howmanypeoplearearound howmanypeoplearearound`
+NOTE: This is known to work on Ubuntu but *not* on Mac OS X.  Feedback on other platforms would be appreciated.
+
 ## Dependencies
 
 ### WiFi adapter with monitor mode
@@ -25,7 +33,7 @@ Personally I prefer the [TN722N](http://www.ebay.com/sch/i.html?_pgn=1&isRefine=
 is only ~$10 and works great with every model of the Raspberry Pi. [Here is a good list of adapters that support 'ad-hoc' mode](http://elinux.org/RPi_USB_Wi-Fi_Adapters) for the
 Raspberry Pi.
 
-### OSX / Mac
+### Mac OS X
 ```
   brew install wireshark
   brew cask install wireshark-chmodbpf
