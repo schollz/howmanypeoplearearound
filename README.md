@@ -9,7 +9,7 @@ A cellphone is determined to be in proximity to the computer based on sniffing W
 requests. Possible uses of *howmanypeoplearearound* include: monitoring foot traffic in your house
 with Raspberry Pis, seeing if your roommates are home, etc.
 
-Tested on Linux (Raspbian and Ubuntu) and macOS.
+Tested on Linux (Raspbian and Ubuntu) and Mac OS X.
 
 ### **It may be illegal** to monitor networks for MAC addresses, especially on networks that *you do not own*. Please check your country's laws (for US [Section 18 U.S. Code § 2511](https://www.law.cornell.edu/uscode/text/18/2511)) - [discussion](https://github.com/schollz/howmanypeoplearearound/issues/4).
 
@@ -18,15 +18,22 @@ Getting started
 
 ## Docker alternative
 
-If you have Docker installed on your machine and you want to take *howmanypeoplearearound* out for a quick spin, you can try the following:
+If Docker is installed locally and you want to take *howmanypeoplearearound* out for a quick spin, you can try the following:
 1. Copy Dockerfile from this repo in your current working directory
 2. `docker build -t howmanypeoplearearound .`  # that . at the end is important
 3. `docker run -it --net=host --name howmanypeoplearearound howmanypeoplearearound`
+
 NOTE: This is known to work on Ubuntu but *not* on Mac OS X.  Feedback on other platforms would be appreciated.
 
 ## Dependencies
 
-### WiFi adapter with monitor mode
+Python 2.7 or preferably Python 3 must be installed on your machine with the `pip` command also available.
+```
+  python -V
+  pip -V
+```
+
+### WiFi adapter with monitor model
 
 There are a number of possible USB WiFi adapters that support monitor mode.
 Personally I prefer the [TN722N](http://www.ebay.com/sch/i.html?_pgn=1&isRefine=false&_nkw=tn722n) which 
@@ -40,25 +47,18 @@ Raspberry Pi.
 ```
 
 ### Linux [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) 
-
 ```
 sudo apt-get install tshark
 ```
 
 Then update it so it can be run as non-root:
-
 ```
 sudo dpkg-reconfigure wireshark-common     (select YES)
-sudo usermod -a -G wireshark $USER
+sudo usermod -a -G wireshark ${USER:-root}
+newgrp wireshark
 ```
 
-You will need to logout and log back in for changes to effect.
-
-
 ## Install
-
-If you have Python installed, run this command
-
 ```
 pip install howmanypeoplearearound
 ```
@@ -68,7 +68,6 @@ pip install howmanypeoplearearound
 ### Quickstart
 
 To run, simply type in
-
 ```bash
 $ howmanypeoplearearound
 Using wlan1 adapter and scanning for 60 seconds...
@@ -82,7 +81,6 @@ an adapter that supports "monitor" mode.
 #### Options
 
 You can modify the scan time, designate the adapter, or modify the output using some command-line options.
-
 ```bash
 $ howmanypeoplearearound --help
 
@@ -102,7 +100,6 @@ Options:
 ### Print JSON
 
 You can generate an JSON-formatted output to see what kind of phones are around:
-
 ```bash
 $ howmanypeoplearearound -o test.json -a wlan1
 [==================================================] 100%         0s left
@@ -132,7 +129,6 @@ A higher rssi means closer (one of these phones is mine, and the other two are m
 ### Run forever
 
 You can add `--loop` to make this run forever and append new lines an output file, `test.json`:
-
 ```bash
 $ howmanypeoplearearound -o test.json -a wlan1 --loop
 ```
@@ -140,7 +136,6 @@ $ howmanypeoplearearound -o test.json -a wlan1 --loop
 ### Visualize 
 
 You can visualize the output from a looped command via a browser using:
-
 ```bash
 $ howmanypeoplearearound --analyze test.json 
 Wrote index.html
