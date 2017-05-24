@@ -7,12 +7,12 @@ import json
 import time
 
 import netifaces
-if os.name != 'nt':
-    from pick import pick
 import click
 
-from howmanypeoplearearound.oui import *
-from howmanypeoplearearound.analysis import *
+from howmanypeoplearearound.oui import oui
+from howmanypeoplearearound.analysis import analyze_file
+if os.name != 'nt':
+    from pick import pick
 
 
 def which(program):
@@ -60,7 +60,7 @@ def showTimer(timeleft):
 @click.option('--number', help='just print the number', is_flag=True)
 @click.option('-j', '--jsonprint', help='print JSON of cellphone data', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
-@click.option('--allmacaddresses', help='do not check MAC addresses against the OUI database to only recognize known cellphone manufacturers', is_flag=True)
+@click.option('--allmacaddresses', help='do not check MAC addresses against the OUI database to only recognize known cellphone manufacturers', is_flag=True)  # noqa
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
 @click.option('--loop', help='loop forever', is_flag=True)
 @click.option('--port', default=8001, help='port to use when serving analysis')
