@@ -167,9 +167,8 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         print("Found no signals, are you sure %s supports monitor mode?" % adapter)
         return
 
-    for mac in foundMacs:
-        foundMacs[mac] = (float(sum(foundMacs[mac])) /
-            float(len(foundMacs[mac])))
+    for key, value in foundMacs.items():
+        foundMacs[key] = float(sum(value)) / float(len(value))
 
     cellphone = [
         'Motorola Mobility LLC, a Lenovo Company',
