@@ -23,7 +23,7 @@ If Docker is installed locally and you want to take *howmanypeoplearearound* out
 2. `docker build -t howmanypeoplearearound .`  # that . at the end is important
 3. `docker run -it --net=host --name howmanypeoplearearound howmanypeoplearearound`
 
-NOTE: This is known to work on Ubuntu but *not* on Mac OS X.  Feedback on other platforms would be appreciated.
+NOTE: This Docker alternative is known to work on Ubuntu but *not* on Mac OS X.  Feedback on other platforms would be appreciated.
 
 ## Dependencies
 
