@@ -33,7 +33,7 @@ Python 2.7 or preferably Python 3 must be installed on your machine with the `pi
   pip -V
 ```
 
-### WiFi adapter with monitor model
+### WiFi adapter that supports monitor mode
 
 There are a number of possible USB WiFi adapters that support monitor mode.
 Personally I prefer the [TN722N](http://www.ebay.com/sch/i.html?_pgn=1&isRefine=false&_nkw=tn722n) which 
