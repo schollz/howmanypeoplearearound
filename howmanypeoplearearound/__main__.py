@@ -64,20 +64,21 @@ def showTimer(timeleft):
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
 @click.option('--loop', help='loop forever', is_flag=True)
 @click.option('--port', default=8001, help='port to use when serving analysis')
-def main(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port):
+@click.option('--sort', help='sort cellphone data by distance (rssi)', is_flag=True)
+def main(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port, sort):
     if analyze != '':
         analyze_file(analyze, port)
         return
     if loop:
         while True:
             scan(adapter, scantime, verbose, number,
-                 nearby, jsonprint, out, allmacaddresses, nocorrection, loop)
+                 nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort)
     else:
         scan(adapter, scantime, verbose, number,
-             nearby, jsonprint, out, allmacaddresses, nocorrection, loop)
+             nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort)
 
 
-def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop):
+def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort):
     """Monitor wifi signals to count the number of people around you"""
 
     # print("OS: " + os.name)
@@ -196,7 +197,8 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
             if not nearby or (nearby and foundMacs[mac] > -70):
                 cellphone_people.append(
                     {'company': oui_id, 'rssi': foundMacs[mac], 'mac': mac})
-
+    if sort:
+        cellphone_people.sort(key=lambda x: x['rssi'], reverse=True)
     if verbose:
         print(json.dumps(cellphone_people, indent=2))
 
