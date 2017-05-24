@@ -7,7 +7,6 @@ install:
     - pip install --upgrade pip setuptools
     - pip install flake8
 before_script:
-    - flake8 . --count --exclude=./howmanypeoplearearound/plotlyjs.py --exit-zero --max-line-length=127 --statistics  # 127 == GitHub editor width
-    - flake8 . --select=E999,F821,F822,F823 --statistics  # Stop build on syntax errors
-
-script: python -V ; pip -V  # a basic no-op
+    flake8 . --count --exclude=./howmanypeoplearearound/plotlyjs.py --exit-zero --max-line-length=127 --statistics  # 127 == GitHub editor width
+script:
+    flake8 . --exclude=./howmanypeoplearearound/plotlyjs.py --select=E999,F821,F822,F823 --statistics  # Stop build on syntax errors
