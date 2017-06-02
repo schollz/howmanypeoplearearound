@@ -7,8 +7,13 @@ from howmanypeoplearearound.plotlyjs import *
 
 
 def analyze_file(fname, port):
+    lines = []
     with open(fname, 'r') as f:
-        lines = [json.loads(line) for line in f]
+      for line in f:
+        try:
+          lines.append(json.loads(line))
+        except:
+          pass
     macs_to_add = []
     for data in lines:
         for c in data['cellphones']:
