@@ -11,6 +11,9 @@ import click
 
 from howmanypeoplearearound.oui import oui
 from howmanypeoplearearound.analysis import analyze_file
+
+# import colors
+from colors import *
 if os.name != 'nt':
     from pick import pick
 
@@ -50,6 +53,10 @@ def showTimer(timeleft):
         time.sleep(0.1)
     print("")
 
+def fileToMacSet(path):
+    with open(path, 'r') as f:
+        maclist = f.readlines()
+    return set([x.strip() for x in maclist])
 
 @click.command()
 @click.option('-a', '--adapter', default='', help='adapter to use')
@@ -65,20 +72,21 @@ def showTimer(timeleft):
 @click.option('--loop', help='loop forever', is_flag=True)
 @click.option('--port', default=8001, help='port to use when serving analysis')
 @click.option('--sort', help='sort cellphone data by distance (rssi)', is_flag=True)
-def main(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port, sort):
+@click.option('--targetmacs', help='read a file that contains target MAC addresses', default='')
+def main(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port, sort, targetmacs):
     if analyze != '':
         analyze_file(analyze, port)
         return
     if loop:
         while True:
             scan(adapter, scantime, verbose, number,
-                 nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort)
+                 nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs)
     else:
         scan(adapter, scantime, verbose, number,
-             nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort)
+             nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs)
 
 
-def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort):
+def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs):
     """Monitor wifi signals to count the number of people around you"""
 
     # print("OS: " + os.name)
@@ -143,6 +151,12 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
     run_tshark = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output, nothing = run_tshark.communicate()
+
+    # read target MAC address
+    targetmacset = set()
+    if targetmacs != '':
+        targetmacset = fileToMacSet(targetmacs)
+
     foundMacs = {}
     for line in output.decode('utf-8').split('\n'):
         if verbose:
@@ -169,6 +183,15 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
 
     for key, value in foundMacs.items():
         foundMacs[key] = float(sum(value)) / float(len(value))
+
+    # Find target MAC address in foundMacs
+    if targetmacset:
+        sys.stdout.write(RED)
+        for mac in foundMacs:
+            if mac in targetmacset:
+                print("Found MAC address: %s" % mac)
+                print("rssi: %s" % str(foundMacs[mac]))
+        sys.stdout.write(RESET)
 
     cellphone = [
         'Motorola Mobility LLC, a Lenovo Company',
