@@ -11,12 +11,10 @@ import click
 
 from howmanypeoplearearound.oui import oui
 from howmanypeoplearearound.analysis import analyze_file
-# import colors
 from howmanypeoplearearound.colors import *
 
 if os.name != 'nt':
     from pick import pick
-
 
 def which(program):
     """Determines whether program exists
@@ -79,7 +77,7 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         return
     if loop:
         while True:
-            scan(adapter, scantime, verbose, number,
+            adapter = scan(adapter, scantime, verbose, number,
                  nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs)
     else:
         scan(adapter, scantime, verbose, number,
