@@ -16,14 +16,7 @@ Tested on Linux (Raspbian and Ubuntu) and Mac OS X.
 Getting started
 ===============
 
-## Docker alternative
-
-If Docker is installed locally and you want to take *howmanypeoplearearound* out for a quick spin, you can try the following:
-1. Copy Dockerfile from this repo in your current working directory
-2. `docker build -t howmanypeoplearearound .`  # that . at the end is important
-3. `docker run -it --net=host --name howmanypeoplearearound howmanypeoplearearound`
-
-NOTE: This Docker alternative is known to work on Ubuntu but *not* on Mac OS X.  Feedback on other platforms would be appreciated.
+For a video walkthrough on how to install, checkout [PNPtutorials](https://youtu.be/dLzouUfJyMM?t=3m2s).
 
 ## Dependencies
 
@@ -63,6 +56,7 @@ newgrp wireshark
 pip install howmanypeoplearearound
 ```
 
+
 ## Run
 
 ### Quickstart
@@ -78,7 +72,17 @@ There are about 3 people around.
 You will be prompted for the WiFi adapter to use for scanning. Make sure to use
 an adapter that supports "monitor" mode.
 
-#### Options
+### Docker alternative
+
+If Docker is installed locally and you want to take *howmanypeoplearearound* out for a quick spin, you can try the following:
+1. Copy Dockerfile from this repo in your current working directory
+2. `docker build -t howmanypeoplearearound .`  # that . at the end is important
+3. `docker run -it --net=host --name howmanypeoplearearound howmanypeoplearearound`
+
+NOTE: This Docker alternative is known to work on Ubuntu but *not* on Mac OS X.  Feedback on other platforms would be appreciated.
+
+
+### Options
 
 You can modify the scan time, designate the adapter, or modify the output using some command-line options.
 ```bash
