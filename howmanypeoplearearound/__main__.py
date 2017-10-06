@@ -71,7 +71,7 @@ def main(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         return
     if loop:
         while True:
-            scan(adapter, scantime, verbose, number,
+            adapter = scan(adapter, scantime, verbose, number,
                  nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort)
     else:
         scan(adapter, scantime, verbose, number,
@@ -228,6 +228,7 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         if verbose:
             print("Wrote %d records to %s" % (len(cellphone_people), out))
     os.remove('/tmp/tshark-temp')
+    return adapter
 
 
 if __name__ == '__main__':
