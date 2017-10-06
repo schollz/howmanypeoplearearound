@@ -249,6 +249,7 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
         if verbose:
             print("Wrote %d records to %s" % (len(cellphone_people), out))
     os.remove('/tmp/tshark-temp')
+    return adapter
 
 
 if __name__ == '__main__':
