@@ -29,9 +29,7 @@ Python 2.7 or preferably Python 3 must be installed on your machine with the `pi
 ### WiFi adapter that supports monitor mode
 
 There are a number of possible USB WiFi adapters that support monitor mode.
-Personally I prefer the [TN722N](http://www.ebay.com/sch/i.html?_pgn=1&isRefine=false&_nkw=tn722n) which 
-is only ~$10 and works great with every model of the Raspberry Pi. [Here is a good list of adapters that support 'ad-hoc' mode](http://elinux.org/RPi_USB_Wi-Fi_Adapters) for the
-Raspberry Pi.
+[Here is a good list of adapters that support 'ad-hoc' mode](http://elinux.org/RPi_USB_Wi-Fi_Adapters) for the Raspberry Pi. 
 
 ### Mac OS X
 ```
