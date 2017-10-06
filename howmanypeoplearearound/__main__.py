@@ -11,9 +11,9 @@ import click
 
 from howmanypeoplearearound.oui import oui
 from howmanypeoplearearound.analysis import analyze_file
-
 # import colors
-from colors import *
+from howmanypeoplearearound.colors import *
+
 if os.name != 'nt':
     from pick import pick
 
