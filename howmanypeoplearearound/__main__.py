@@ -110,7 +110,7 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             print('wireshark not found, install using: \n\tbrew install wireshark')
             print(
                 'you may also need to execute: \n\tbrew cask install wireshark-chmodbpf')
-        return
+        sys.exit(1)
 
     if jsonprint:
         number = True
@@ -122,7 +122,7 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             print('You must specify the adapter with   -a ADAPTER')
             print('Choose from the following: ' +
                   ', '.join(netifaces.interfaces()))
-            return
+            sys.exit(1)
         title = 'Please choose the adapter you want to use: '
         adapter, index = pick(netifaces.interfaces(), title)
 
@@ -188,7 +188,7 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
 
     if not foundMacs:
         print("Found no signals, are you sure %s supports monitor mode?" % adapter)
-        return
+        sys.exit(1)
 
     for key, value in foundMacs.items():
         foundMacs[key] = float(sum(value)) / float(len(value))
