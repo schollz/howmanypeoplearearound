@@ -98,8 +98,8 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
     oui = load_dictionary(dictionary)
 
     if not oui:
-        print('couldn\'t load oui.txt')
-        return
+        print('couldn\'t load [%s]' % dictionary)
+        sys.exit(1)
 
     try:
         tshark = which("tshark")
