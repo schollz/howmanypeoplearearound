@@ -47,6 +47,11 @@ Namely you want to find a USB adapter with one of the following chipsets: Athero
   brew cask install wireshark-chmodbpf
 ```
 
+You need to dissociate from any AP before initiating the scanning:
+```
+sudo /System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -z
+```
+
 ### Linux [tshark](https://www.wireshark.org/docs/man-pages/tshark.html) 
 ```
 sudo apt-get install tshark

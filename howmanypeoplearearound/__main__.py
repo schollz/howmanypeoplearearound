@@ -73,20 +73,21 @@ def fileToMacSet(path):
 @click.option('--port', default=8001, help='port to use when serving analysis')
 @click.option('--sort', help='sort cellphone data by distance (rssi)', is_flag=True)
 @click.option('--targetmacs', help='read a file that contains target MAC addresses', default='')
-def main(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port, sort, targetmacs):
+@click.option('-f', '--pcap', help='read a pcap file instead of capturing')
+def main(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port, sort, targetmacs, pcap):
     if analyze != '':
         analyze_file(analyze, port)
         return
     if loop:
         while True:
             adapter = scan(adapter, scantime, verbose, dictionary, number,
-                 nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs)
+                 nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs, pcap)
     else:
         scan(adapter, scantime, verbose, dictionary, number,
-             nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs)
+             nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs, pcap)
 
 
-def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs):
+def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs, pcap):
     """Monitor wifi signals to count the number of people around you"""
 
     # print("OS: " + os.name)
@@ -117,39 +118,45 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
     if number:
         verbose = False
 
-    if len(adapter) == 0:
-        if os.name == 'nt':
-            print('You must specify the adapter with   -a ADAPTER')
-            print('Choose from the following: ' +
-                  ', '.join(netifaces.interfaces()))
-            sys.exit(1)
-        title = 'Please choose the adapter you want to use: '
-        adapter, index = pick(netifaces.interfaces(), title)
+    if not pcap:
+        if len(adapter) == 0:
+            if os.name == 'nt':
+                print('You must specify the adapter with   -a ADAPTER')
+                print('Choose from the following: ' +
+                      ', '.join(netifaces.interfaces()))
+                sys.exit(1)
+            title = 'Please choose the adapter you want to use: '
+            adapter, index = pick(netifaces.interfaces(), title)
 
-    print("Using %s adapter and scanning for %s seconds..." %
-          (adapter, scantime))
+        print("Using %s adapter and scanning for %s seconds..." %
+              (adapter, scantime))
 
-    if not number:
-        # Start timer
-        t1 = threading.Thread(target=showTimer, args=(scantime,))
-        t1.daemon = True
-        t1.start()
+        if not number:
+            # Start timer
+            t1 = threading.Thread(target=showTimer, args=(scantime,))
+            t1.daemon = True
+            t1.start()
 
-    # Scan with tshark
-    command = [tshark, '-I', '-i', adapter, '-a',
-               'duration:' + scantime, '-w', '/tmp/tshark-temp']
-    if verbose:
-        print(' '.join(command))
-    run_tshark = subprocess.Popen(
-        command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    stdout, nothing = run_tshark.communicate()
-    if not number:
-        t1.join()
+        dump_file = '/tmp/tshark-temp'
+        # Scan with tshark
+        command = [tshark, '-I', '-i', adapter, '-a',
+                   'duration:' + scantime, '-w', dump_file]
+        if verbose:
+            print(' '.join(command))
+        run_tshark = subprocess.Popen(
+            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        stdout, nothing = run_tshark.communicate()
+
+
+        if not number:
+            t1.join()
+    else:
+        dump_file = pcap
 
     # Read tshark output
     command = [
         tshark, '-r',
-        '/tmp/tshark-temp', '-T',
+        dump_file, '-T',
         'fields', '-e',
         'wlan.sa', '-e',
         'wlan.bssid', '-e',
@@ -259,7 +266,8 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             f.write(json.dumps(data_dump) + "\n")
         if verbose:
             print("Wrote %d records to %s" % (len(cellphone_people), out))
-    os.remove('/tmp/tshark-temp')
+    if not pcap:
+        os.remove(dump_file)
     return adapter
 
 
