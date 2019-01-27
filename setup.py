@@ -8,7 +8,7 @@ setup(
     author='schollz',
     url='https://github.com/schollz/howmanypeoplearearound',
     author_email='hypercube.platforms@gmail.com',
-    download_url='https://github.com/schollz/howmanypeoplearearound/archive/v0.3.5.tar.gz',
+    download_url='https://github.com/schollz/howmanypeoplearearound/archive/v0.5.0.tar.gz',
     keywords=['tshark', 'wifi', 'location'],
     classifiers=[],
     install_requires=[
