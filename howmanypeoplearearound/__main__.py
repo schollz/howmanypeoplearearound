@@ -1,6 +1,7 @@
 import threading
 import sys
 import os
+import os.path
 import platform
 import subprocess
 import json
@@ -9,7 +10,7 @@ import time
 import netifaces
 import click
 
-from howmanypeoplearearound.oui import oui
+from howmanypeoplearearound.oui import load_dictionary, download_oui
 from howmanypeoplearearound.analysis import analyze_file
 from howmanypeoplearearound.colors import *
 
@@ -61,6 +62,7 @@ def fileToMacSet(path):
 @click.option('-z', '--analyze', default='', help='analyze file')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
 @click.option('-o', '--out', default='', help='output cellphone data to file')
+@click.option('-d', '--dictionary', default='oui.txt', help='OUI dictionary')
 @click.option('-v', '--verbose', help='verbose mode', is_flag=True)
 @click.option('--number', help='just print the number', is_flag=True)
 @click.option('-j', '--jsonprint', help='print JSON of cellphone data', is_flag=True)
@@ -71,24 +73,33 @@ def fileToMacSet(path):
 @click.option('--port', default=8001, help='port to use when serving analysis')
 @click.option('--sort', help='sort cellphone data by distance (rssi)', is_flag=True)
 @click.option('--targetmacs', help='read a file that contains target MAC addresses', default='')
-def main(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port, sort, targetmacs):
+def main(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port, sort, targetmacs):
     if analyze != '':
         analyze_file(analyze, port)
         return
     if loop:
         while True:
-            adapter = scan(adapter, scantime, verbose, number,
+            adapter = scan(adapter, scantime, verbose, dictionary, number,
                  nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs)
     else:
-        scan(adapter, scantime, verbose, number,
+        scan(adapter, scantime, verbose, dictionary, number,
              nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs)
 
 
-def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs):
+def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs):
     """Monitor wifi signals to count the number of people around you"""
 
     # print("OS: " + os.name)
     # print("Platform: " + platform.system())
+
+    if (not os.path.isfile(dictionary)) or (not os.access(dictionary, os.R_OK)):
+        download_oui(dictionary)
+
+    oui = load_dictionary(dictionary)
+
+    if not oui:
+        print('couldn\'t load [%s]' % dictionary)
+        sys.exit(1)
 
     try:
         tshark = which("tshark")
@@ -99,7 +110,7 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
             print('wireshark not found, install using: \n\tbrew install wireshark')
             print(
                 'you may also need to execute: \n\tbrew cask install wireshark-chmodbpf')
-        return
+        sys.exit(1)
 
     if jsonprint:
         number = True
@@ -111,7 +122,7 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
             print('You must specify the adapter with   -a ADAPTER')
             print('Choose from the following: ' +
                   ', '.join(netifaces.interfaces()))
-            return
+            sys.exit(1)
         title = 'Please choose the adapter you want to use: '
         adapter, index = pick(netifaces.interfaces(), title)
 
@@ -177,7 +188,7 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
 
     if not foundMacs:
         print("Found no signals, are you sure %s supports monitor mode?" % adapter)
-        return
+        sys.exit(1)
 
     for key, value in foundMacs.items():
         foundMacs[key] = float(sum(value)) / float(len(value))
@@ -254,13 +265,3 @@ def scan(adapter, scantime, verbose, number, nearby, jsonprint, out, allmacaddre
 
 if __name__ == '__main__':
     main()
-    # oui = {}
-    # with open('data/oui.txt','r') as f:
-    #     for line in f:
-    #         if '(hex)' in line:
-    #             data = line.split('(hex)')
-    #             key = data[0].replace('-',':').lower().strip()
-    #             company = data[1].strip()
-    #             oui[key] = company
-    # with open('oui.json','w') as f:
-    #     f.write(json.dumps(oui,indent=2))
