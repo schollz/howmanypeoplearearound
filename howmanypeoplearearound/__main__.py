@@ -16,6 +16,7 @@ from howmanypeoplearearound.colors import *
 
 if os.name != 'nt':
     from pick import pick
+    import curses
 
 def which(program):
     """Determines whether program exists
@@ -126,7 +127,11 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
                       ', '.join(netifaces.interfaces()))
                 sys.exit(1)
             title = 'Please choose the adapter you want to use: '
-            adapter, index = pick(netifaces.interfaces(), title)
+            try:
+                adapter, index = pick(netifaces.interfaces(), title)
+            except curses.error as e:
+                print('Please check your $TERM settings: %s' % (e))
+                sys.exit(1)
 
         print("Using %s adapter and scanning for %s seconds..." %
               (adapter, scantime))
