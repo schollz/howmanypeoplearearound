@@ -69,26 +69,27 @@ def fileToMacSet(path):
 @click.option('-j', '--jsonprint', help='print JSON of cellphone data', is_flag=True)
 @click.option('-n', '--nearby', help='only quantify signals that are nearby (rssi > -70)', is_flag=True)
 @click.option('--allmacaddresses', help='do not check MAC addresses against the OUI database to only recognize known cellphone manufacturers', is_flag=True)  # noqa
+@click.option('-m', '--manufacturers', default='', help='read list of known manufacturers from file')
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
 @click.option('--loop', help='loop forever', is_flag=True)
 @click.option('--port', default=8001, help='port to use when serving analysis')
 @click.option('--sort', help='sort cellphone data by distance (rssi)', is_flag=True)
 @click.option('--targetmacs', help='read a file that contains target MAC addresses', default='')
 @click.option('-f', '--pcap', help='read a pcap file instead of capturing')
-def main(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, analyze, port, sort, targetmacs, pcap):
+def main(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, analyze, port, sort, targetmacs, pcap):
     if analyze != '':
         analyze_file(analyze, port)
         return
     if loop:
         while True:
             adapter = scan(adapter, scantime, verbose, dictionary, number,
-                 nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs, pcap)
+                 nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap)
     else:
         scan(adapter, scantime, verbose, dictionary, number,
-             nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs, pcap)
+             nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap)
 
 
-def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, nocorrection, loop, sort, targetmacs, pcap):
+def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap):
     """Monitor wifi signals to count the number of people around you"""
 
     # print("OS: " + os.name)
@@ -214,21 +215,26 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
                 print("rssi: %s" % str(foundMacs[mac]))
         sys.stdout.write(RESET)
 
-    cellphone = [
-        'Motorola Mobility LLC, a Lenovo Company',
-        'GUANGDONG OPPO MOBILE TELECOMMUNICATIONS CORP.,LTD',
-        'Huawei Symantec Technologies Co.,Ltd.',
-        'Microsoft',
-        'HTC Corporation',
-        'Samsung Electronics Co.,Ltd',
-        'SAMSUNG ELECTRO-MECHANICS(THAILAND)',
-        'BlackBerry RTS',
-        'LG ELECTRONICS INC',
-        'Apple, Inc.',
-        'LG Electronics',
-        'OnePlus Tech (Shenzhen) Ltd',
-        'Xiaomi Communications Co Ltd',
-        'LG Electronics (Mobile Communications)']
+    if manufacturers:
+        f = open(manufacturers,'r')
+        cellphone = [line.rstrip('\n') for line in f.readlines()]
+        f.close()
+    else:
+        cellphone = [
+            'Motorola Mobility LLC, a Lenovo Company',
+            'GUANGDONG OPPO MOBILE TELECOMMUNICATIONS CORP.,LTD',
+            'Huawei Symantec Technologies Co.,Ltd.',
+            'Microsoft',
+            'HTC Corporation',
+            'Samsung Electronics Co.,Ltd',
+            'SAMSUNG ELECTRO-MECHANICS(THAILAND)',
+            'BlackBerry RTS',
+            'LG ELECTRONICS INC',
+            'Apple, Inc.',
+            'LG Electronics',
+            'OnePlus Tech (Shenzhen) Ltd',
+            'Xiaomi Communications Co Ltd',
+            'LG Electronics (Mobile Communications)']
 
     cellphone_people = []
     for mac in foundMacs:
