@@ -14,6 +14,7 @@ def analyze_file(fname, port):
           lines.append(json.loads(line))
         except:
           pass
+    lines = sorted(lines, key=lambda k: k['time'])
     macs_to_add = []
     for data in lines:
         for c in data['cellphones']:
