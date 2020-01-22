@@ -6,6 +6,7 @@ import platform
 import subprocess
 import json
 import time
+from collections import OrderedDict
 
 import netifaces
 import click
@@ -71,25 +72,26 @@ def fileToMacSet(path):
 @click.option('--allmacaddresses', help='do not check MAC addresses against the OUI database to only recognize known cellphone manufacturers', is_flag=True)  # noqa
 @click.option('-m', '--manufacturers', default='', help='read list of known manufacturers from file')
 @click.option('--nocorrection', help='do not apply correction', is_flag=True)
+@click.option('--aggbymanufacturer', help='do not store mac addresses in the output file, instead store aggregate count of cellphones by manufacturer.', is_flag=True)
 @click.option('--loop', help='loop forever', is_flag=True)
 @click.option('--port', default=8001, help='port to use when serving analysis')
 @click.option('--sort', help='sort cellphone data by distance (rssi)', is_flag=True)
 @click.option('--targetmacs', help='read a file that contains target MAC addresses', default='')
 @click.option('-f', '--pcap', help='read a pcap file instead of capturing')
-def main(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, analyze, port, sort, targetmacs, pcap):
+def main(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, aggbymanufacturer, loop, analyze, port, sort, targetmacs, pcap):
     if analyze != '':
         analyze_file(analyze, port)
         return
     if loop:
         while True:
             adapter = scan(adapter, scantime, verbose, dictionary, number,
-                 nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap)
+                 nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, aggbymanufacturer, loop, sort, targetmacs, pcap)
     else:
         scan(adapter, scantime, verbose, dictionary, number,
-             nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap)
+             nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, aggbymanufacturer, loop, sort, targetmacs, pcap)
 
 
-def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, loop, sort, targetmacs, pcap):
+def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out, allmacaddresses, manufacturers, nocorrection, aggbymanufacturer, loop, sort, targetmacs, pcap):
     """Monitor wifi signals to count the number of people around you"""
 
     # print("OS: " + os.name)
@@ -215,6 +217,7 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
                 print("rssi: %s" % str(foundMacs[mac]))
         sys.stdout.write(RESET)
 
+    OUI_MISSING = 'Not in OUI'
     if manufacturers:
         f = open(manufacturers,'r')
         cellphone = [line.rstrip('\n') for line in f.readlines()]
@@ -234,11 +237,13 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             'LG Electronics',
             'OnePlus Tech (Shenzhen) Ltd',
             'Xiaomi Communications Co Ltd',
-            'LG Electronics (Mobile Communications)']
+            'LG Electronics (Mobile Communications)',
+            OUI_MISSING]
 
     cellphone_people = []
+    aggregated_by_manufacturer = OrderedDict((company, 0) for company in sorted(cellphone))
     for mac in foundMacs:
-        oui_id = 'Not in OUI'
+        oui_id = OUI_MISSING
         if mac[:8] in oui:
             oui_id = oui[mac[:8]]
         if verbose:
@@ -247,6 +252,7 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             if not nearby or (nearby and foundMacs[mac] > -70):
                 cellphone_people.append(
                     {'company': oui_id, 'rssi': foundMacs[mac], 'mac': mac})
+                aggregated_by_manufacturer[oui_id] += 1
     if sort:
         cellphone_people.sort(key=lambda x: x['rssi'], reverse=True)
     if verbose:
@@ -271,9 +277,13 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
         else:
             print("There are about %d people around." % num_people)
 
+    data = cellphone_people
+    if aggbymanufacturer:
+        data = aggregated_by_manufacturer
+
     if out:
         with open(out, 'a') as f:
-            data_dump = {'cellphones': cellphone_people, 'time': time.time()}
+            data_dump = {'cellphones': data, 'time': time.time()}
             f.write(json.dumps(data_dump) + "\n")
         if verbose:
             print("Wrote %d records to %s" % (len(cellphone_people), out))
