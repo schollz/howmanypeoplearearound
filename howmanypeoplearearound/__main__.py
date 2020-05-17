@@ -58,7 +58,7 @@ def fileToMacSet(path):
         maclist = f.readlines()
     return set([x.strip() for x in maclist])
 
-@click.command()
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.option('-a', '--adapter', default='', help='adapter to use')
 @click.option('-z', '--analyze', default='', help='analyze file')
 @click.option('-s', '--scantime', default='60', help='time in seconds to scan')
