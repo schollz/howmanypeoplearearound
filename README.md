@@ -44,7 +44,7 @@ Namely you want to find a USB adapter with one of the following chipsets: Athero
 ### Mac OS X
 ```
   brew install wireshark
-  brew cask install wireshark-chmodbpf
+  brew install --cask wireshark-chmodbpf
 ```
 
 You need to dissociate from any AP before initiating the scanning:
