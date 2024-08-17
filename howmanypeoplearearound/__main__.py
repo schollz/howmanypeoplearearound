@@ -6,6 +6,7 @@ import platform
 import subprocess
 import json
 import time
+import tempfile
 
 import netifaces
 import click
@@ -17,6 +18,7 @@ from howmanypeoplearearound.colors import *
 if os.name != 'nt':
     from pick import pick
     import curses
+
 
 def which(program):
     """Determines whether program exists
@@ -143,20 +145,28 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             t1.daemon = True
             t1.start()
 
-        dump_file = '/tmp/tshark-temp'
+        tmpdir = tempfile.mkdtemp()
+        dump_file = os.path.join(tmpdir, 'tshark-temp')
+
         # Scan with tshark
-        command = [tshark, '-I', '-i', adapter, '-a',
+        # EP, 20240817: -Q flags silences non-essential output that we don't use anyway,
+        # so anything on stderr is actually an error
+        command = [tshark, '-Q', '-I', '-i', adapter, '-a',
                    'duration:' + scantime, '-w', dump_file]
         if verbose:
             print(' '.join(command))
         run_tshark = subprocess.Popen(
-            command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        stdout, nothing = run_tshark.communicate()
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = run_tshark.communicate()
 
+        if stderr != b"":
+            print("Warning: error when running tshark:\n")
+            print(stderr.decode('utf8').strip())
 
         if not number:
             t1.join()
     else:
+        tmpdir = None
         dump_file = pcap
 
     # Read tshark output
@@ -171,8 +181,12 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
     if verbose:
         print(' '.join(command))
     run_tshark = subprocess.Popen(
-        command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    output, nothing = run_tshark.communicate()
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, stderr = run_tshark.communicate()
+
+    if stderr != b"":
+        print("Warning: error parsing tshark output")
+        print(stderr.decode('utf8').strip())
 
     # read target MAC address
     targetmacset = set()
@@ -180,6 +194,7 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
         targetmacset = fileToMacSet(targetmacs)
 
     foundMacs = {}
+
     for line in output.decode('utf-8').split('\n'):
         if verbose:
             print(line)
@@ -277,8 +292,9 @@ def scan(adapter, scantime, verbose, dictionary, number, nearby, jsonprint, out,
             f.write(json.dumps(data_dump) + "\n")
         if verbose:
             print("Wrote %d records to %s" % (len(cellphone_people), out))
-    if not pcap:
+    if tmpdir is not None:
         os.remove(dump_file)
+        os.rmdir(tmpdir)
     return adapter
 
 
